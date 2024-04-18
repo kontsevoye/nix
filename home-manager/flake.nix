@@ -10,13 +10,36 @@
   };
 
   outputs = { nixpkgs, home-manager, ... }:
-    let
-      system = "aarch64-darwin";
-      pkgs = nixpkgs.legacyPackages.${system};
-    in {
-      homeConfigurations."e.kontsevoy" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [ ./home.nix ];
-      };
+  {
+    homeConfigurations = {
+      "e.kontsevoy@e-kontsevoy-mac" = home-manager.lib.homeManagerConfiguration ({
+        modules = [ 
+          ./home.nix
+          {
+            home = {
+              username = "e.kontsevoy";
+              homeDirectory = "/Users/e.kontsevoy";
+            };
+          }
+        ];
+        pkgs = import nixpkgs {
+          system = "aarch64-darwin";
+        };
+      });
+      "e.kontsevoy@nixos" = home-manager.lib.homeManagerConfiguration ({
+        modules = [ 
+          ./home.nix
+          {
+            home = {
+              username = "e.kontsevoy";
+              homeDirectory = "/home/e.kontsevoy";
+            };
+          }
+        ];
+        pkgs = import nixpkgs {
+          system = "aarch64-linux";
+        };
+      });
     };
+  };
 }

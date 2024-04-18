@@ -5,9 +5,6 @@ let
 in {
   home.stateVersion = "23.11";
 
-  home.username = "e.kontsevoy";
-  home.homeDirectory = "/Users/e.kontsevoy";
-
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowUnfreePredicate = (_: true);
 
@@ -51,12 +48,11 @@ in {
   ];
 
   home.file = {
-    ".gnupg/gpg-agent.conf".text = lib.mkIf (pkgs.stdenv.isDarwin) ''
+    ".gnupg/gpg-agent.conf".text = (if (pkgs.stdenv.isDarwin) then ''
       pinentry-program ${pkgs.pinentry_mac}/bin/pinentry-mac
-    '';
-    #".gnupg/gpg-agent.conf".text = lib.mkIf (!pkgs.stdenv.isDarwin) ''
-    #  pinentry-program ${pkgs.pinentry}/bin/pinentry
-    #'';
+    '' else ''
+      pinentry-program ${pkgs.pinentry}/bin/pinentry
+    '');
   };
 
   home.sessionVariables = {
@@ -64,7 +60,10 @@ in {
   };
 
   programs.home-manager.enable = true;
-  programs.direnv.enable = true;
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+  };
 
   programs.gpg = {
     enable = true;
@@ -177,14 +176,8 @@ in {
       compdef _symfony_complete symfony
       compdef _symfony_complete composer
     '';
-    sessionVariables = {
-      ZSH_CACHE_DIR = [ "$HOME/.zsh_cache" ];
-    };
     localVariables = {
-      EXAMPLE_ENV = [
-        "die"
-        "hard"
-      ];
+      ZSH_CACHE_DIR = [ "$HOME/.zsh_cache" ];
     };
     envExtra = ''
       # Homebrew envs
