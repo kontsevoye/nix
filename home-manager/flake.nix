@@ -40,6 +40,21 @@
           system = "aarch64-linux";
         };
       });
+      "nixos@nixos" = home-manager.lib.homeManagerConfiguration ({
+        modules = [
+          ./home.nix
+          ./home-gui.nix
+          {
+            home = {
+              username = "nixos";
+              homeDirectory = "/home/nixos";
+            };
+          }
+        ];
+        pkgs = import nixpkgs {
+          system = "x86_64-linux";
+        };
+      });
     };
   };
 }
