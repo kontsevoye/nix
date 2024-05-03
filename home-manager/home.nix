@@ -41,6 +41,7 @@ in {
     wget
     yt-dlp
     yq
+    nixfmt-classic
   ] ++ lib.optionals pkgs.stdenv.isLinux [
     pinentry
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
