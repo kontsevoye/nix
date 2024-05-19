@@ -55,6 +55,21 @@
           system = "x86_64-linux";
         };
       });
+      "deck@steamdeck" = home-manager.lib.homeManagerConfiguration ({
+        modules = [
+          ./home.nix
+          ./home-gui.nix
+          {
+            home = {
+              username = "deck";
+              homeDirectory = "/home/deck";
+            };
+          }
+        ];
+        pkgs = import nixpkgs {
+          system = "x86_64-linux";
+        };
+      });
     };
   };
 }
