@@ -42,9 +42,10 @@ in {
     yt-dlp
     yq
     nixfmt-classic
-    yandex-disk
+    pigz
   ] ++ lib.optionals pkgs.stdenv.isLinux [
     pinentry
+    yandex-disk
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     pinentry_mac
   ];
