@@ -1,61 +1,76 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 let
   gitIdentity = pkgs.writeShellScriptBin "git-identity" (builtins.readFile ./git-identity.sh);
-in {
+in
+{
   home.stateVersion = "23.11";
 
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowUnfreePredicate = (_: true);
 
-  home.packages = with pkgs; [
-    (nerdfonts.override { fonts = [ "Hack" ]; })
-    android-tools
-    ansible
-    bat
-    bun
-    curl
-    cloudflared
-    devenv
-    fcgi
-    ffmpeg
-    fzf
-    gh
-    gitIdentity
-    go
-    htop
-    imagemagick
-    jq
-    lazydocker
-    nodejs_20
-    php83
-    php83Packages.composer
-    python312
-    starship
-    streamlink
-    symfony-cli
-    tmux
-    wasmedge
-    wasmer
-    wasmtime
-    wget
-    yt-dlp
-    yq
-    nixfmt-classic
-    pigz
-  ] ++ lib.optionals pkgs.stdenv.isLinux [
-    pinentry
-    yandex-disk
-  ] ++ lib.optionals pkgs.stdenv.isDarwin [
-    pinentry_mac
-  ];
+  home.packages =
+    with pkgs;
+    [
+      (nerdfonts.override { fonts = [ "Hack" ]; })
+      android-tools
+      ansible
+      bat
+      bun
+      curl
+      cloudflared
+      devenv
+      fcgi
+      ffmpeg
+      fzf
+      gh
+      gitIdentity
+      go
+      htop
+      imagemagick
+      jq
+      lazydocker
+      nodejs_20
+      php83
+      php83Packages.composer
+      python312
+      starship
+      streamlink
+      symfony-cli
+      tmux
+      wasmedge
+      wasmer
+      wasmtime
+      wget
+      yt-dlp
+      yq
+      # nixfmt-classic
+      # nixfmt
+      nixfmt-rfc-style
+      pigz
+    ]
+    ++ lib.optionals pkgs.stdenv.isLinux [
+      pinentry
+      yandex-disk
+    ]
+    ++ lib.optionals pkgs.stdenv.isDarwin [ pinentry_mac ];
 
   home.file = {
-    ".gnupg/gpg-agent.conf".text = (if (pkgs.stdenv.isDarwin) then ''
-      pinentry-program ${pkgs.pinentry_mac}/bin/pinentry-mac
-    '' else ''
-      pinentry-program ${pkgs.pinentry}/bin/pinentry
-    '');
+    ".gnupg/gpg-agent.conf".text = (
+      if (pkgs.stdenv.isDarwin) then
+        ''
+          pinentry-program ${pkgs.pinentry_mac}/bin/pinentry-mac
+        ''
+      else
+        ''
+          pinentry-program ${pkgs.pinentry}/bin/pinentry
+        ''
+    );
   };
 
   home.sessionVariables = {

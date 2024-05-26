@@ -8,4 +8,3 @@
     streamlink-twitch-gui-bin
   ];
 }
-

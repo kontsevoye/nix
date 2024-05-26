@@ -7,7 +7,7 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 ```
 
 2. Follow the [nix-darwin readme](./darwin/README.md)
-3. Follow the [home-manager readme](./home-manager/README.md)
+3. Follow the [home-manager readme](HOME_MANAGER_README.md)
 
 ## Collect garbage 
 
