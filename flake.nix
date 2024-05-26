@@ -9,6 +9,10 @@
       url = "github:nix-community/NixOS-WSL/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    darwin = {
+      url = "github:lnl7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -16,6 +20,7 @@
       nixpkgs,
       home-manager,
       nixos-wsl,
+      darwin,
       ...
     }:
     let
@@ -51,6 +56,12 @@
             nixos-wsl.nixosModules.default
             ./wsl/default.nix
           ];
+        };
+      };
+      darwinConfigurations = {
+        "e-kontsevoy-mac" = darwin.lib.darwinSystem {
+          system = "aarch64-darwin";
+          modules = [ ./darwin/default.nix ];
         };
       };
     };

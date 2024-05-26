@@ -1,4 +1,4 @@
-{ pkgs, ... }: 
+{ pkgs, ... }:
 
 {
   services.nix-daemon.enable = true;
@@ -33,9 +33,7 @@
 
   homebrew = {
     enable = true;
-    brews = [
-      "mas"
-    ];
+    brews = [ "mas" ];
     caskArgs = {
       appdir = "~/Applications";
       require_sha = true;
