@@ -45,7 +45,6 @@ in
       tmux
       wasmedge
       wasmer
-      wasmtime
       wget
       yt-dlp
       yq
@@ -57,6 +56,7 @@ in
     ++ lib.optionals pkgs.stdenv.isLinux [
       pinentry
       yandex-disk
+      wasmtime
     ]
     ++ lib.optionals pkgs.stdenv.isDarwin [ pinentry_mac ];
 
