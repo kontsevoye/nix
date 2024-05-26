@@ -26,3 +26,9 @@ home-manager switch --flake .
 ```bash
 home-manager expire-generations "-1 days"
 ```
+
+### Read news
+
+```bash
+home-manager --flake . news
+```

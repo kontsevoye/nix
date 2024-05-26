@@ -9,7 +9,7 @@ let
   gitIdentity = pkgs.writeShellScriptBin "git-identity" (builtins.readFile ./git-identity.sh);
 in
 {
-  home.stateVersion = "23.11";
+  home.stateVersion = "24.05";
 
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowUnfreePredicate = (_: true);
