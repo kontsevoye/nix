@@ -43,9 +43,7 @@
     casks = [
       "jetbrains-toolbox"
       "orbstack"
-      "diffusionbee"
       "deepl"
-      "imazing"
       "lunar"
       "microsoft-edge"
       "steam"
