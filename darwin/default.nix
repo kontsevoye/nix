@@ -41,34 +41,20 @@
       require_sha = true;
     };
     casks = [
-      "hiddenbar"
-      "llamachat"
-      "raycast"
       "jetbrains-toolbox"
       "orbstack"
       "diffusionbee"
       "deepl"
-      "discord"
       "imazing"
-      "keepassxc"
-      "keka"
-      "iterm2"
       "lunar"
       "microsoft-edge"
-      "qbittorrent"
-      "scroll-reverser"
       "steam"
       "sublime-text"
-      "visual-studio-code"
-      "vlc"
       "whisky"
       "yandex-disk"
       "yandex-music"
-      "slack"
-      "pritunl"
       "openvpn-connect"
       "telegram"
-      "zoom"
     ];
     masApps = {
       "WireGuard" = 1451685025;
