@@ -33,6 +33,8 @@
 
   homebrew = {
     enable = true;
+    onActivation.cleanup = "zap";
+    global.brewfile = true;
     brews = [ "mas" ];
     caskArgs = {
       appdir = "~/Applications";
