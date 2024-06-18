@@ -38,7 +38,7 @@ in
       nodejs_20
       php83
       php83Packages.composer
-      python312
+      (python312.withPackages (p: with p; [ pip pycryptodome setuptools ]))
       starship
       streamlink
       symfony-cli
