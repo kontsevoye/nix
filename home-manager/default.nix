@@ -52,6 +52,7 @@ in
       # nixfmt
       nixfmt-rfc-style
       pigz
+      e2fsprogs
     ]
     ++ lib.optionals pkgs.stdenv.isLinux [
       pinentry
