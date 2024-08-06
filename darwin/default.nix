@@ -54,7 +54,7 @@
       "lunar"
       "microsoft-edge"
       "qbittorrent"
-      "scroll-reverser"
+      "unnaturalscrollwheels"
       "steam"
       "sublime-text"
       "visual-studio-code"
