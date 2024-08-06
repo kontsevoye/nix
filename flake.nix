@@ -38,7 +38,7 @@
       homeConfigurations = {
         "e.kontsevoy@e-kontsevoy-mac" =
           mkHome ./home-manager/machines/e.kontsevoy_at_e-kontsevoy-mac.nix "aarch64-darwin"
-            [ ./home-manager/work-laptop-apps.nix ];
+            [ ];
         "e.kontsevoy@nixos" =
           mkHome ./home-manager/machines/e.kontsevoy_at_nixos_aka_mac_vm.nix "aarch64-linux"
             [ ];
