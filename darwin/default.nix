@@ -42,7 +42,6 @@
     };
     casks = [
       "hiddenbar"
-      "llamachat"
       "raycast"
       "jetbrains-toolbox"
       "orbstack"
