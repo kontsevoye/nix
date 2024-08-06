@@ -64,10 +64,10 @@
       "slack"
       "pritunl"
       "openvpn-connect"
-      "telegram"
       "zoom"
     ];
     masApps = {
+      "Telegram" = 747648890;
       "WireGuard" = 1451685025;
     };
   };
