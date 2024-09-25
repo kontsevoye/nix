@@ -8,11 +8,13 @@
   nix.settings.extra-substituters = [
     "https://devenv.cachix.org"
     "https://nix-community.cachix.org"
+    "https://kontsevoye.cachix.org"
     "https://cache.flakehub.com"
   ];
   nix.settings.extra-trusted-public-keys = [
     "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
     "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    "kontsevoye.cachix.org-1:ZuSYCN/a5dirtTesvyrwmLwXzohZ+CpQqSrwXrchcrc="
     "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM="
     "cache.flakehub.com-4:Asi8qIv291s0aYLyH6IOnr5Kf6+OF14WVjkE6t3xMio="
     "cache.flakehub.com-5:zB96CRlL7tiPtzA9/WKyPkp3A2vqxqgdgyTVNGShPDU="
