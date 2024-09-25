@@ -7,6 +7,9 @@
 
 let
   gitIdentity = pkgs.writeShellScriptBin "git-identity" (builtins.readFile ./git-identity.sh);
+  php = pkgs.php83.buildEnv {
+    extensions = { all, enabled }: with all; enabled ++ [ redis amqp xdebug pcov ];
+  };
 in
 {
   home.stateVersion = "24.05";
@@ -36,7 +39,7 @@ in
       jq
       lazydocker
       nodejs_20
-      php83
+      php
       php83Packages.composer
       (python312.withPackages (p: with p; [ pip pycryptodome setuptools ]))
       starship
@@ -53,6 +56,7 @@ in
       nixfmt-rfc-style
       pigz
       e2fsprogs
+      mtr 
     ]
     ++ lib.optionals pkgs.stdenv.isLinux [
       pinentry
