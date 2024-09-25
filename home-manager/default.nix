@@ -57,6 +57,7 @@ in
       pigz
       e2fsprogs
       mtr 
+      cachix
     ]
     ++ lib.optionals pkgs.stdenv.isLinux [
       pinentry
