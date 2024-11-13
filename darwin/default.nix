@@ -81,6 +81,7 @@
       "pritunl"
       "openvpn-connect"
       "zoom"
+      "localsend"
     ];
     masApps = {
       "Telegram" = 747648890;
