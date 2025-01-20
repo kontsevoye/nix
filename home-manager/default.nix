@@ -12,7 +12,7 @@ let
   };
 in
 {
-  home.stateVersion = "24.05";
+  home.stateVersion = "24.11";
 
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowUnfreePredicate = (_: true);
@@ -20,7 +20,7 @@ in
   home.packages =
     with pkgs;
     [
-      (nerdfonts.override { fonts = [ "Hack" ]; })
+      nerd-fonts.hack
       android-tools
       ansible
       bat
@@ -46,7 +46,6 @@ in
       streamlink
       symfony-cli
       tmux
-      wasmedge
       wasmer
       wget
       yt-dlp
