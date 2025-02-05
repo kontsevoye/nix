@@ -93,11 +93,15 @@ in
     package = pkgs.gnupg24;
     publicKeys = [
       {
-        source = ./instane_at_gmail_dot_com.txt;
+        source = ./instane_at_gmail_dot_com.rsa.txt;
         trust = 5;
       }
       {
-        source = ./e_dot_kontsevoy_at_propellerads_dot_net.txt;
+        source = ./instane_at_gmail_dot_com.ed25519.txt;
+        trust = 5;
+      }
+      {
+        source = ./e_dot_kontsevoy_at_propellerads_dot_net.rsa.txt;
         trust = 5;
       }
     ];
@@ -121,6 +125,9 @@ in
       user.personal.name = "Evgenii Kontsevoi";
       user.personal.email = "instane@gmail.com";
       user.personal.signingKey = "04560FBB83458AA8";
+      user.personal_ed.name = "Evgenii Kontsevoi";
+      user.personal_ed.email = "instane@gmail.com";
+      user.personal_ed.signingKey = "1F2A8E0294C59B8A";
     };
     aliases = {
       identity = "! git-identity";
