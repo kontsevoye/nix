@@ -46,6 +46,7 @@
             [ ];
         "nixos@nixos" = mkHome ./home-manager/machines/nixos_at_nixos_aka_wsl.nix "x86_64-linux" [
           ./home-manager/gui-apps.nix
+          ./home-manager/wsl-gui-apps.nix
         ];
         "deck@steamdeck" = mkHome ./home-manager/machines/deck_at_steamdeck.nix "x86_64-linux" [
           ./home-manager/gui-apps.nix
