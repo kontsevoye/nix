@@ -4,7 +4,7 @@ let
   dockerRoot = ''"C:\Program Files\Docker\Docker\resources"'';
 in
 {
-  system.stateVersion = "24.05";
+  system.stateVersion = "24.11";
 
   wsl = {
     enable = true;
