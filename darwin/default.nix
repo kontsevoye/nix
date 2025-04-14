@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 {
-  services.nix-daemon.enable = true;
+  nix.enable = true;
 
   # Necessary for using flakes on this system.
   nix.settings.experimental-features = "nix-command flakes";
@@ -44,7 +44,7 @@
     promptInit = "";
   };
 
-  system.stateVersion = 5;
+  system.stateVersion = 6;
   nixpkgs.hostPlatform = "aarch64-darwin";
 
   homebrew = {
@@ -93,4 +93,5 @@
     name = "e.kontsevoy";
     home = "/Users/e.kontsevoy";
   };
+  home-manager.users."e.kontsevoy" = import ../home-manager/default.nix;
 }

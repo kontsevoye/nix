@@ -13,7 +13,6 @@
       url = "github:lnl7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0.1";
   };
 
   outputs =
@@ -22,7 +21,6 @@
       home-manager,
       nixos-wsl,
       darwin,
-      determinate,
       ...
     }:
     let
@@ -38,9 +36,6 @@
     in
     {
       homeConfigurations = {
-        "e.kontsevoy@e-kontsevoy-mac" =
-          mkHome ./home-manager/machines/e.kontsevoy_at_e-kontsevoy-mac.nix "aarch64-darwin"
-            [ ];
         "e.kontsevoy@nixos" =
           mkHome ./home-manager/machines/e.kontsevoy_at_nixos_aka_mac_vm.nix "aarch64-linux"
             [ ];
@@ -65,8 +60,11 @@
         "e-kontsevoy-mac" = darwin.lib.darwinSystem {
           system = "aarch64-darwin";
           modules = [ 
-            determinate.darwinModules.default
             ./darwin/default.nix 
+            home-manager.darwinModules.home-manager {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+            }
           ];
         };
       };

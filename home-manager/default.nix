@@ -14,9 +14,6 @@ in
 {
   home.stateVersion = "24.11";
 
-  nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.allowUnfreePredicate = (_: true);
-
   home.packages =
     with pkgs;
     [
@@ -111,7 +108,7 @@ in
     enable = true;
     lfs.enable = true;
     signing = {
-      gpgPath = "${pkgs.gnupg24}/bin/gpg2";
+      signer = "${pkgs.gnupg24}/bin/gpg2";
       # required by signing module, but would be overwritten in extraConfig by git identity
       key = "04560FBB83458AA8";
       signByDefault = true;
