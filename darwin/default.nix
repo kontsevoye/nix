@@ -9,7 +9,6 @@
     "https://devenv.cachix.org"
     "https://nix-community.cachix.org"
     "https://kontsevoye.cachix.org"
-    "https://cache.flakehub.com"
   ];
   nix.settings.extra-trusted-public-keys = [
     "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
@@ -83,10 +82,10 @@
       "zoom"
       "localsend"
     ];
-    masApps = {
-      "Telegram" = 747648890;
-      "WireGuard" = 1451685025;
-    };
+    #masApps = {
+    #  "Telegram" = 747648890;
+    #  "WireGuard" = 1451685025;
+    #};
   };
 
   users.users."e.kontsevoy" = {
