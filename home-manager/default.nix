@@ -161,7 +161,7 @@ in
     enableCompletion = true;
     # compinit required during antidote plugin load
     # so it is loading a little bit earlier and original completionInit is overwritten with empty string
-    initExtraBeforeCompInit = ''
+    initContent = let initExtraBeforeCompInit = lib.mkOrder 550 ''
       # do compinit only once a day
       # (reduce zsh load time from ~0.8s to ~0.1s)
       # todo generate it while building home-manager
@@ -170,7 +170,11 @@ in
         compinit
       done
       compinit -C
-    '';
+    ''; initExtra = lib.mkOrder 1000 ''
+      # Symfony completions
+      compdef _symfony_complete symfony
+      compdef _symfony_complete composer
+    ''; in lib.mkMerge [ initExtraBeforeCompInit initExtra ];
     completionInit = "";
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
@@ -198,11 +202,6 @@ in
       "ohmyzsh/ohmyzsh path:plugins/direnv"
       "ohmyzsh/ohmyzsh path:plugins/starship"
     ];
-    initExtra = ''
-      # Symfony completions
-      compdef _symfony_complete symfony
-      compdef _symfony_complete composer
-    '';
     localVariables = {
       ZSH_CACHE_DIR = [ "$HOME/.zsh_cache" ];
     };
