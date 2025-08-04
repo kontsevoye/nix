@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 let
   dockerRoot = ''"C:\Program Files\Docker\Docker\resources"'';
@@ -31,4 +36,3 @@ in
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
 }
-

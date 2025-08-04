@@ -8,7 +8,16 @@
 let
   gitIdentity = pkgs.writeShellScriptBin "git-identity" (builtins.readFile ./git-identity.sh);
   php = pkgs.php83.buildEnv {
-    extensions = { all, enabled }: with all; enabled ++ [ redis amqp xdebug pcov ];
+    extensions =
+      { all, enabled }:
+      with all;
+      enabled
+      ++ [
+        redis
+        amqp
+        xdebug
+        pcov
+      ];
   };
 in
 {
@@ -38,7 +47,13 @@ in
       nodejs_20
       php
       php83Packages.composer
-      (python312.withPackages (p: with p; [ pip pycryptodome setuptools ]))
+      (python312.withPackages (
+        p: with p; [
+          pip
+          pycryptodome
+          setuptools
+        ]
+      ))
       starship
       streamlink
       symfony-cli
@@ -52,7 +67,7 @@ in
       nixfmt-rfc-style
       pigz
       e2fsprogs
-      mtr 
+      mtr
       cachix
     ]
     ++ lib.optionals pkgs.stdenv.isLinux [
@@ -161,20 +176,28 @@ in
     enableCompletion = true;
     # compinit required during antidote plugin load
     # so it is loading a little bit earlier and original completionInit is overwritten with empty string
-    initContent = let initExtraBeforeCompInit = lib.mkOrder 550 ''
-      # do compinit only once a day
-      # (reduce zsh load time from ~0.8s to ~0.1s)
-      # todo generate it while building home-manager
-      autoload -Uz compinit
-      for dump in ~/.zcompdump(N.mh+24); do
-        compinit
-      done
-      compinit -C
-    ''; initExtra = lib.mkOrder 1000 ''
-      # Symfony completions
-      compdef _symfony_complete symfony
-      compdef _symfony_complete composer
-    ''; in lib.mkMerge [ initExtraBeforeCompInit initExtra ];
+    initContent =
+      let
+        initExtraBeforeCompInit = lib.mkOrder 550 ''
+          # do compinit only once a day
+          # (reduce zsh load time from ~0.8s to ~0.1s)
+          # todo generate it while building home-manager
+          autoload -Uz compinit
+          for dump in ~/.zcompdump(N.mh+24); do
+            compinit
+          done
+          compinit -C
+        '';
+        initExtra = lib.mkOrder 1000 ''
+          # Symfony completions
+          compdef _symfony_complete symfony
+          compdef _symfony_complete composer
+        '';
+      in
+      lib.mkMerge [
+        initExtraBeforeCompInit
+        initExtra
+      ];
     completionInit = "";
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
