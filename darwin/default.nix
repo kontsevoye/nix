@@ -93,4 +93,5 @@
     home = "/Users/e.kontsevoy";
   };
   home-manager.users."e.kontsevoy" = import ../home-manager/default.nix;
+  system.primaryUser = "e.kontsevoy";
 }
