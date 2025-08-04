@@ -7,7 +7,7 @@
 
 let
   gitIdentity = pkgs.writeShellScriptBin "git-identity" (builtins.readFile ./git-identity.sh);
-  php = pkgs.php83.buildEnv {
+  php = pkgs.php84.buildEnv {
     extensions =
       { all, enabled }:
       with all;
@@ -46,7 +46,7 @@ in
       lazydocker
       nodejs_20
       php
-      php83Packages.composer
+      php.packages.composer
       (python312.withPackages (
         p: with p; [
           pip
@@ -62,8 +62,6 @@ in
       wget
       yt-dlp
       yq
-      # nixfmt-classic
-      # nixfmt
       nixfmt-rfc-style
       pigz
       e2fsprogs
