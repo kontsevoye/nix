@@ -176,7 +176,7 @@ in
     # so it is loading a little bit earlier and original completionInit is overwritten with empty string
     initContent =
       let
-        initExtraBeforeCompInit = lib.mkOrder 550 ''
+        initExtraBeforeCompInit = lib.mkOrder 500 ''
           # do compinit only once a day
           # (reduce zsh load time from ~0.8s to ~0.1s)
           # todo generate it while building home-manager
