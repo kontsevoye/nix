@@ -31,10 +31,27 @@
           modules = [
             ./home-manager/default.nix
             home
-          ] ++ extraModules;
+          ]
+          ++ extraModules;
         };
+      systems = [
+        "aarch64-darwin"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "x86_64-linux"
+      ];
+      forEachSystem =
+        function:
+        nixpkgs.lib.genAttrs systems (
+          system:
+          function {
+            inherit system;
+            pkgs = nixpkgs.legacyPackages.${system};
+          }
+        );
     in
     {
+      formatter = forEachSystem ({ pkgs, ... }: pkgs.nixfmt-rfc-style);
       homeConfigurations = {
         "e.kontsevoy@nixos" =
           mkHome ./home-manager/machines/e.kontsevoy_at_nixos_aka_mac_vm.nix "aarch64-linux"
@@ -59,9 +76,10 @@
       darwinConfigurations = {
         "e-kontsevoy-mac" = darwin.lib.darwinSystem {
           system = "aarch64-darwin";
-          modules = [ 
-            ./darwin/default.nix 
-            home-manager.darwinModules.home-manager {
+          modules = [
+            ./darwin/default.nix
+            home-manager.darwinModules.home-manager
+            {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
             }
