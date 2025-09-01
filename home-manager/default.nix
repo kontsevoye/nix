@@ -67,6 +67,8 @@ in
       e2fsprogs
       mtr
       cachix
+      skopeo
+      umoci
     ]
     ++ lib.optionals pkgs.stdenv.isLinux [
       pinentry
