@@ -5,7 +5,8 @@ in {
   nix.enable = true;
 
   # Necessary for using flakes on this system.
-  nix.settings.experimental-features = "nix-command flakes";
+  #nix.settings.experimental-features = "nix-command flakes";
+  nix.settings.experimental-features = [ "nix-command flakes" ];
   nix.settings.extra-substituters = [
     "https://devenv.cachix.org"
     "https://nix-community.cachix.org"

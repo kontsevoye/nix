@@ -133,7 +133,7 @@ in
       key = "04560FBB83458AA8";
       signByDefault = true;
     };
-    extraConfig = {
+    settings = {
       # extremely important, otherwise git will attempt to guess a default user identity. see `man git-config` for more details
       user.useConfigOnly = true;
       user.work.name = "Evgeny Kontsevoy";
@@ -145,10 +145,10 @@ in
       user.personal_ed.name = "Evgenii Kontsevoi";
       user.personal_ed.email = "instane@gmail.com";
       user.personal_ed.signingKey = "1F2A8E0294C59B8A";
-    };
-    aliases = {
-      identity = "! git-identity";
-      id = "! git-identity";
+      alias = {
+        identity = "! git-identity";
+        id = "! git-identity";
+      };
     };
     ignores = [
       ".DS_Store"
@@ -230,7 +230,7 @@ in
       "ohmyzsh/ohmyzsh path:plugins/starship"
     ];
     localVariables = {
-      ZSH_CACHE_DIR = [ "$HOME/.zsh_cache" ];
+      ZSH_CACHE_DIR = "${config.home.homeDirectory}/.zsh_cache";
     };
     envExtra = ''
       # Homebrew envs
