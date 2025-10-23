@@ -1,6 +1,7 @@
 { pkgs, ... }:
 
-{
+let username = "e.kontsevoy";
+in {
   nix.enable = true;
 
   # Necessary for using flakes on this system.
@@ -24,8 +25,7 @@
     "cache.flakehub.com-10:2GqeNlIp6AKp4EF2MVbE1kBOp9iBSyo0UPR9KoR0o1Y="
   ];
   nix.settings.trusted-users = [
-    "root"
-    "e.kontsevoy"
+    username
   ];
 
   nixpkgs.config.allowUnfree = true;
@@ -81,17 +81,14 @@
       "openvpn-connect"
       "zoom"
       "localsend"
+      "ghostty"
     ];
-    #masApps = {
-    #  "Telegram" = 747648890;
-    #  "WireGuard" = 1451685025;
-    #};
   };
 
-  users.users."e.kontsevoy" = {
-    name = "e.kontsevoy";
-    home = "/Users/e.kontsevoy";
+  users.users."${username}" = {
+    name = username;
+    home = "/Users/${username}";
   };
-  home-manager.users."e.kontsevoy" = import ../home-manager/default.nix;
-  system.primaryUser = "e.kontsevoy";
+  home-manager.users."${username}" = import ../home-manager/default.nix;
+  system.primaryUser = "${username}";
 }

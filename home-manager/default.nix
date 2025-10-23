@@ -69,6 +69,9 @@ in
       cachix
       skopeo
       umoci
+      bore-cli
+      attic-client
+      codex
     ]
     ++ lib.optionals pkgs.stdenv.isLinux [
       pinentry
@@ -98,6 +101,8 @@ in
   programs.direnv = {
     enable = true;
     enableZshIntegration = true;
+    nix-direnv.enable = true;
+    silent = true;
   };
 
   programs.gpg = {
@@ -222,7 +227,6 @@ in
       "ohmyzsh/ohmyzsh path:plugins/gh"
       "ohmyzsh/ohmyzsh path:plugins/brew"
       "ohmyzsh/ohmyzsh path:plugins/bun"
-      "ohmyzsh/ohmyzsh path:plugins/direnv"
       "ohmyzsh/ohmyzsh path:plugins/starship"
     ];
     localVariables = {
