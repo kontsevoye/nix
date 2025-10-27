@@ -19,11 +19,7 @@ let
         pcov
       ];
   };
-in
-{
-  home.stateVersion = "25.11";
-
-  home.packages =
+  commonPackages =
     with pkgs;
     [
       nerd-fonts.hack
@@ -72,13 +68,21 @@ in
       bore-cli
       attic-client
       codex
-    ]
-    ++ lib.optionals pkgs.stdenv.isLinux [
-      pinentry
-      yandex-disk
-      wasmtime
-    ]
-    ++ lib.optionals pkgs.stdenv.isDarwin [ pinentry_mac ];
+    ];
+  linuxPackages = with pkgs; [
+    pinentry
+    yandex-disk
+    wasmtime
+  ];
+  darwinPackages = with pkgs; [ pinentry_mac ];
+in
+{
+  home.stateVersion = "25.11";
+
+  home.packages =
+    commonPackages
+    ++ lib.optionals pkgs.stdenv.isLinux linuxPackages
+    ++ lib.optionals pkgs.stdenv.isDarwin darwinPackages;
 
   home.file = {
     ".gnupg/gpg-agent.conf".text = (

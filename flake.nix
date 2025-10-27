@@ -16,7 +16,7 @@
   };
 
   outputs =
-    {
+    inputs@{
       nixpkgs,
       home-manager,
       nixos-wsl,

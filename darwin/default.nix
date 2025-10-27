@@ -1,12 +1,14 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 let username = "e.kontsevoy";
 in {
   nix.enable = true;
 
   # Necessary for using flakes on this system.
-  #nix.settings.experimental-features = "nix-command flakes";
-  nix.settings.experimental-features = [ "nix-command flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
   nix.settings.extra-substituters = [
     "https://devenv.cachix.org"
     "https://nix-community.cachix.org"
@@ -25,16 +27,14 @@ in {
     "cache.flakehub.com-9:wChaSeTI6TeCuV/Sg2513ZIM9i0qJaYsF+lZCXg0J6o="
     "cache.flakehub.com-10:2GqeNlIp6AKp4EF2MVbE1kBOp9iBSyo0UPR9KoR0o1Y="
   ];
-  nix.settings.trusted-users = [
-    username
-  ];
+  nix.settings.trusted-users = lib.mkAfter [ username ];
 
-  nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.allowUnfreePredicate = (_: true);
+  nixpkgs.config.allowUnfree = lib.mkDefault true;
+  nixpkgs.config.allowUnfreePredicate = lib.mkDefault (_: true);
 
   programs.zsh = {
     # enable nix & profile sourcing in /etc/{zshenv,zprofile,zshrc}
-    # but disable all enabled dy default configs as they would be managed in home-manager
+    # but disable defaults managed via home-manager
     enable = true;
     # default true
     enableBashCompletion = false;
