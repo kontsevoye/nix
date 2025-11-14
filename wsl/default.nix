@@ -9,7 +9,7 @@ let
   dockerRoot = ''"C:\Program Files\Docker\Docker\resources"'';
 in
 {
-  system.stateVersion = "24.11";
+  system.stateVersion = "25.05";
 
   wsl = {
     enable = true;
@@ -28,6 +28,8 @@ in
     "nix-command"
     "flakes"
   ];
+  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowUnfreePredicate = (_: true);
 
   environment = {
     systemPackages = with pkgs; [ git ];
