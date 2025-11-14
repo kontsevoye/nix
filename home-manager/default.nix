@@ -54,7 +54,6 @@ let
       streamlink
       symfony-cli
       tmux
-      wasmer
       wget
       yt-dlp
       yq
