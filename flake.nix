@@ -56,10 +56,6 @@
         "e.kontsevoy@nixos" =
           mkHome ./home-manager/machines/e.kontsevoy_at_nixos_aka_mac_vm.nix "aarch64-linux"
             [ ];
-        "nixos@nixos" = mkHome ./home-manager/machines/nixos_at_nixos_aka_wsl.nix "x86_64-linux" [
-          ./home-manager/gui-apps.nix
-          ./home-manager/wsl-gui-apps.nix
-        ];
         "deck@steamdeck" = mkHome ./home-manager/machines/deck_at_steamdeck.nix "x86_64-linux" [
           ./home-manager/gui-apps.nix
         ];
@@ -70,6 +66,19 @@
           modules = [
             nixos-wsl.nixosModules.default
             ./wsl/default.nix
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.users.nixos = {
+                imports = [
+                  ./home-manager/machines/nixos_at_nixos_aka_wsl.nix
+                  ./home-manager/default.nix
+                  ./home-manager/gui-apps.nix
+                  ./home-manager/wsl-gui-apps.nix
+                ];
+              };
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+            }
           ];
         };
       };
