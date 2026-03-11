@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -51,7 +51,7 @@
         );
     in
     {
-      formatter = forEachSystem ({ pkgs, ... }: pkgs.nixfmt-rfc-style);
+      formatter = forEachSystem ({ pkgs, ... }: pkgs.nixfmt);
       homeConfigurations = {
         "e.kontsevoy@nixos" =
           mkHome ./home-manager/machines/e.kontsevoy_at_nixos_aka_mac_vm.nix "aarch64-linux"

@@ -40,7 +40,7 @@ let
       imagemagick
       jq
       lazydocker
-      nodejs_20
+      nodejs_22
       php
       php.packages.composer
       (python312.withPackages (
@@ -57,7 +57,7 @@ let
       wget
       yt-dlp
       yq
-      nixfmt-rfc-style
+      nixfmt
       pigz
       e2fsprogs
       mtr
@@ -174,7 +174,7 @@ in
       set number
       colorscheme monokai_pro
     '';
-    extraLuaConfig = ''
+    initLua = ''
       require'nvim-lastplace'.setup{}
     '';
   };

@@ -61,7 +61,6 @@ in {
       "raycast"
       "jetbrains-toolbox"
       "orbstack"
-      "deepl"
       "discord"
       "keepassxc"
       "keka"
@@ -83,6 +82,8 @@ in {
       "zoom"
       "localsend"
       "ghostty"
+      "claude"
+      "claude-code"
     ];
   };
 
