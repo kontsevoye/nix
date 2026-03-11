@@ -1,7 +1,6 @@
 {
   config,
   pkgs,
-  lib,
   ...
 }:
 
@@ -9,7 +8,10 @@ let
   dockerRoot = ''"C:\Program Files\Docker\Docker\resources"'';
 in
 {
+  imports = [ ../shared/nix-settings.nix ];
+
   system.stateVersion = "25.05";
+  nixpkgs.hostPlatform = "x86_64-linux";
 
   wsl = {
     enable = true;
@@ -23,13 +25,7 @@ in
     script = "${config.wsl.wslConf.automount.root}/wsl/docker-desktop/docker-desktop-user-distro proxy --docker-desktop-root ${config.wsl.wslConf.automount.root}/wsl/docker-desktop ${dockerRoot}";
   };
 
-  # Enable the Flakes feature and the accompanying new nix command-line tool
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
-  nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.allowUnfreePredicate = (_: true);
+  nix.gc.dates = "weekly";
 
   environment = {
     systemPackages = with pkgs; [ git ];

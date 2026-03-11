@@ -19,55 +19,54 @@ let
         pcov
       ];
   };
-  commonPackages =
-    with pkgs;
-    [
-      nerd-fonts.hack
-      android-tools
-      ansible
-      bat
-      bun
-      curl
-      cloudflared
-      devenv
-      fcgi
-      ffmpeg
-      fzf
-      gh
-      gitIdentity
-      go
-      htop
-      imagemagick
-      jq
-      lazydocker
-      nodejs_22
-      php
-      php.packages.composer
-      (python312.withPackages (
-        p: with p; [
-          pip
-          pycryptodome
-          setuptools
-        ]
-      ))
-      starship
-      streamlink
-      symfony-cli
-      tmux
-      wget
-      yt-dlp
-      yq
-      nixfmt
-      pigz
-      e2fsprogs
-      mtr
-      cachix
-      skopeo
-      umoci
-      bore-cli
-      attic-client
-      codex
-    ];
+  commonPackages = with pkgs; [
+    nerd-fonts.hack
+    android-tools
+    ansible
+    bat
+    bun
+    curl
+    cloudflared
+    devenv
+    fcgi
+    ffmpeg
+    fzf
+    gh
+    gitIdentity
+    go
+    htop
+    imagemagick
+    jq
+    lazydocker
+    nodejs_22
+    php
+    php.packages.composer
+    (python312.withPackages (
+      p: with p; [
+        pip
+        pycryptodome
+        setuptools
+      ]
+    ))
+    starship
+    streamlink
+    symfony-cli
+    tmux
+    wget
+    yt-dlp
+    yq
+    nixfmt
+    nixfmt-tree
+    pigz
+    e2fsprogs
+    mtr
+    cachix
+    skopeo
+    umoci
+    bore-cli
+    attic-client
+    codex
+  ];
   linuxPackages = with pkgs; [
     pinentry
     yandex-disk
@@ -211,8 +210,6 @@ in
     syntaxHighlighting.enable = true;
     antidote.enable = true;
     antidote.plugins = [
-      # Bundle Fish-like auto suggestions just like you would with antigen.
-      "zsh-users/zsh-autosuggestions"
       # Bundle extra zsh completions too.
       "zsh-users/zsh-completions"
       "agkozak/zsh-z"
@@ -235,24 +232,26 @@ in
     localVariables = {
       ZSH_CACHE_DIR = "${config.home.homeDirectory}/.zsh_cache";
     };
-    envExtra = ''
-      # Homebrew envs
-      if [[ "$OSTYPE" == "darwin"* && -x /opt/homebrew/bin/brew ]]; then
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-      fi
+    envExtra =
+      lib.optionalString pkgs.stdenv.isDarwin ''
+        # Homebrew envs
+        if [[ -x /opt/homebrew/bin/brew ]]; then
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+        fi
 
-      # Orbstack envs
-      if [[ "$OSTYPE" == "darwin"* && -x "$HOME/.orbstack/shell/init.zsh" ]]; then
-        source ~/.orbstack/shell/init.zsh 2>/dev/null || :
-      fi
-
-      # Custom path entries
-      path=("$HOME/.composer/vendor/bin" $path)
-      path=("$HOME/go/bin" $path)
-      path=("$HOME/.local/bin" $path)
-      if [[ "$OSTYPE" == "darwin"* && -x "$HOME/Library/Application Support/JetBrains/Toolbox/scripts" ]]; then
+        # Orbstack envs
+        if [[ -x "$HOME/.orbstack/shell/init.zsh" ]]; then
+          source ~/.orbstack/shell/init.zsh 2>/dev/null || :
+        fi
+      ''
+      + ''
+        # Custom path entries
+        path=("$HOME/.composer/vendor/bin" $path)
+        path=("$HOME/go/bin" $path)
+        path=("$HOME/.local/bin" $path)
+      ''
+      + lib.optionalString pkgs.stdenv.isDarwin ''
         path=("$HOME/Library/Application Support/JetBrains/Toolbox/scripts" $path)
-      fi
-    '';
+      '';
   };
 }

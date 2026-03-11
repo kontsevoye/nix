@@ -1,4 +1,6 @@
 {
+  description = "Personal Nix configuration";
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
@@ -27,7 +29,10 @@
       mkHome =
         home: system: extraModules:
         home-manager.lib.homeManagerConfiguration {
-          pkgs = import nixpkgs { system = system; };
+          pkgs = import nixpkgs {
+            system = system;
+            config.allowUnfree = true;
+          };
           modules = [
             ./home-manager/default.nix
             home
@@ -52,6 +57,17 @@
     in
     {
       formatter = forEachSystem ({ pkgs, ... }: pkgs.nixfmt);
+      devShells = forEachSystem (
+        { pkgs, ... }:
+        {
+          default = pkgs.mkShell {
+            packages = with pkgs; [
+              nixfmt
+              nil
+            ];
+          };
+        }
+      );
       homeConfigurations = {
         "e.kontsevoy@nixos" =
           mkHome ./home-manager/machines/e.kontsevoy_at_nixos_aka_mac_vm.nix "aarch64-linux"
@@ -62,7 +78,6 @@
       };
       nixosConfigurations = {
         nixos = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
           modules = [
             nixos-wsl.nixosModules.default
             ./wsl/default.nix
@@ -84,7 +99,6 @@
       };
       darwinConfigurations = {
         "e-kontsevoy-mac" = darwin.lib.darwinSystem {
-          system = "aarch64-darwin";
           modules = [
             ./darwin/default.nix
             home-manager.darwinModules.home-manager
