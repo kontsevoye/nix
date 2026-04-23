@@ -33,7 +33,10 @@ in
     enable = true;
     onActivation.cleanup = "zap";
     global.brewfile = true;
-    brews = [ "mas" ];
+    brews = [
+      "mas"
+      "yubico-piv-tool"
+    ];
     caskArgs = {
       appdir = "~/Applications";
       require_sha = true;
@@ -65,7 +68,11 @@ in
       "localsend"
       "ghostty"
       "claude"
-      "claude-code"
+      "claude-code@latest"
+      "codex"
+      "copilot-cli"
+      "rustdesk"
+      "wallspace"
     ];
   };
 

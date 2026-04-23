@@ -41,6 +41,7 @@ let
     nodejs_22
     php
     php.packages.composer
+    uv
     (python312.withPackages (
       p: with p; [
         pip
