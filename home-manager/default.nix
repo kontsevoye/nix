@@ -69,7 +69,7 @@ let
     codex
   ];
   linuxPackages = with pkgs; [
-    pinentry-curses
+    pinentry-qt
     yandex-disk
     wasmtime
   ];
@@ -91,7 +91,7 @@ in
         ''
       else
         ''
-          pinentry-program ${pkgs.pinentry-curses}/bin/pinentry
+          pinentry-program ${pkgs.pinentry-qt}/bin/pinentry
         ''
     );
   };
