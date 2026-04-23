@@ -66,7 +66,6 @@ let
     umoci
     bore-cli
     attic-client
-    codex
   ];
   linuxPackages = with pkgs; [
     pinentry-qt
@@ -74,12 +73,17 @@ let
     wasmtime
   ];
   darwinPackages = with pkgs; [ pinentry_mac ];
+  installCodexFromNix =
+    !(
+      pkgs.stdenv.isLinux && config.home.username == "evkon" && config.home.homeDirectory == "/home/evkon"
+    );
 in
 {
   home.stateVersion = "25.11";
 
   home.packages =
     commonPackages
+    ++ lib.optionals installCodexFromNix [ pkgs.codex ]
     ++ lib.optionals pkgs.stdenv.isLinux linuxPackages
     ++ lib.optionals pkgs.stdenv.isDarwin darwinPackages;
 
@@ -165,6 +169,8 @@ in
     viAlias = true;
     vimAlias = true;
     vimdiffAlias = true;
+    withPython3 = true;
+    withRuby = true;
     plugins = with pkgs.vimPlugins; [
       vim-nix
       vim-monokai-pro
