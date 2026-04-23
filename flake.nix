@@ -75,6 +75,7 @@
         "deck@steamdeck" = mkHome ./home-manager/machines/deck_at_steamdeck.nix "x86_64-linux" [
           ./home-manager/gui-apps.nix
         ];
+        "evkon@evkon-pc" = mkHome ./home-manager/machines/evkon_at_evkon_pc.nix "x86_64-linux" [];
       };
       nixosConfigurations = {
         nixos = nixpkgs.lib.nixosSystem {
