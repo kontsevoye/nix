@@ -46,11 +46,6 @@
   };
 
   fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/94a02c88-01f7-4d05-9f22-459b0d6440d6";
-    fsType = "ext4";
-  };
-
-  fileSystems."/boot/efi" = {
     device = "/dev/disk/by-uuid/801B-B94D";
     fsType = "vfat";
     options = [

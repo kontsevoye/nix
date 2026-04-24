@@ -34,15 +34,15 @@
 
   boot = {
     loader = {
+      timeout = 5;
       efi = {
         canTouchEfiVariables = true;
-        efiSysMountPoint = "/boot/efi";
+        efiSysMountPoint = "/boot";
       };
-      grub = {
+      systemd-boot = {
         enable = true;
-        efiSupport = true;
-        device = "nodev";
-        useOSProber = true;
+        configurationLimit = 10;
+        editor = false;
       };
     };
     kernelParams = [

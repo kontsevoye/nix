@@ -16,8 +16,8 @@ When installing from the GitHub URL, make sure the required changes are committe
 - Desktop: KDE Plasma 6 with SDDM on Wayland
 - GPU: NVIDIA RTX 4070 with the proprietary NVIDIA stack and open kernel module
 - Audio: PipeWire with ALSA, PulseAudio compatibility, JACK, and WirePlumber
-- Boot: UEFI + GRUB with OS prober enabled
-- Filesystems: the current machine's Btrfs/ext4/vfat UUIDs
+- Boot: UEFI + systemd-boot; Windows is auto-detected when it uses the same ESP
+- Filesystems: the current machine's Btrfs/vfat UUIDs
 - Home Manager: the existing `evkon@evkon-pc` profile
 - Trust store: the local homelab root CA
 - Flatpak: the currently installed system Flatpak applications from Flathub
@@ -29,9 +29,10 @@ The current hardware configuration is machine-specific. It points to the existin
 ```text
 /         UUID=faaed0a5-1cbf-4218-8114-21a985dab993  btrfs subvol=root
 /home     UUID=faaed0a5-1cbf-4218-8114-21a985dab993  btrfs subvol=home
-/boot     UUID=94a02c88-01f7-4d05-9f22-459b0d6440d6  ext4
-/boot/efi UUID=801B-B94D                             vfat
+/boot     UUID=801B-B94D                             vfat ESP
 ```
+
+The old Fedora ext4 `/boot` partition is not used by this configuration anymore. It can be left untouched during the first install and repurposed or removed later.
 
 As written, `/` uses `subvol=root`, which is also the current Fedora root subvolume. If you want to keep Fedora available for rollback, create a separate Btrfs subvolume for NixOS and update `nixos/evkon-pc/hardware-configuration.nix` before installing.
 
@@ -76,19 +77,12 @@ sudo btrfs subvolume create /mnt/home
 sudo umount /mnt
 ```
 
-Clean the separate ext4 `/boot` partition if Fedora is no longer needed:
-
-```bash
-sudo mount /dev/disk/by-uuid/94a02c88-01f7-4d05-9f22-459b0d6440d6 /mnt
-sudo find /mnt -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
-sudo umount /mnt
-```
-
-Do not format the EFI System Partition unless you intentionally want to remove every UEFI bootloader on it. If Fedora is gone and you only want to remove old Fedora/NixOS bootloader files, remove those vendor directories:
+Do not format the EFI System Partition unless you intentionally want to remove every UEFI bootloader on it. If Fedora is gone and you only want to remove old Fedora/NixOS bootloader files, remove those vendor directories and old NixOS loader entries. Keep `EFI/Microsoft` for Windows:
 
 ```bash
 sudo mount /dev/disk/by-uuid/801B-B94D /mnt
-sudo rm -rf -- /mnt/EFI/fedora /mnt/EFI/nixos
+sudo rm -rf -- /mnt/EFI/fedora /mnt/EFI/nixos /mnt/EFI/systemd
+sudo rm -f -- /mnt/loader/entries/nixos-*.conf
 sudo umount /mnt
 ```
 
@@ -102,9 +96,7 @@ For the current layout:
 sudo mount -o subvol=root,compress=zstd:1,ssd,discard=async /dev/disk/by-uuid/faaed0a5-1cbf-4218-8114-21a985dab993 /mnt
 sudo mkdir -p /mnt/home /mnt/boot
 sudo mount -o subvol=home,compress=zstd:1,ssd,discard=async /dev/disk/by-uuid/faaed0a5-1cbf-4218-8114-21a985dab993 /mnt/home
-sudo mount /dev/disk/by-uuid/94a02c88-01f7-4d05-9f22-459b0d6440d6 /mnt/boot
-sudo mkdir -p /mnt/boot/efi
-sudo mount /dev/disk/by-uuid/801B-B94D /mnt/boot/efi
+sudo mount /dev/disk/by-uuid/801B-B94D /mnt/boot
 ```
 
 If you want encrypted secrets to be applied during the first install, copy the private age identity before running `nixos-install`:
