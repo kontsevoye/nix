@@ -73,17 +73,12 @@ let
     wasmtime
   ];
   darwinPackages = with pkgs; [ pinentry_mac ];
-  installCodexFromNix =
-    !(
-      pkgs.stdenv.isLinux && config.home.username == "evkon" && config.home.homeDirectory == "/home/evkon"
-    );
 in
 {
-  home.stateVersion = "25.11";
+  home.stateVersion = "26.05";
 
   home.packages =
     commonPackages
-    ++ lib.optionals installCodexFromNix [ pkgs.codex ]
     ++ lib.optionals pkgs.stdenv.isLinux linuxPackages
     ++ lib.optionals pkgs.stdenv.isDarwin darwinPackages;
 
@@ -193,6 +188,8 @@ in
     initContent =
       let
         initExtraBeforeCompInit = lib.mkOrder 500 ''
+          mkdir -p ${lib.escapeShellArg "${config.home.homeDirectory}/.zsh_cache/completions"}
+
           # do compinit only once a day
           # (reduce zsh load time from ~0.8s to ~0.1s)
           # todo generate it while building home-manager

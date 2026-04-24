@@ -9,6 +9,7 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 2. Follow the [nix-darwin readme](DARWIN_README.md)
 3. Follow the [home-manager readme](HOME_MANAGER_README.md)
 4. Follow the [WSL readme](WSL_README.md)
+5. Follow the [NixOS readme](NIXOS_README.md)
 
 ## Collect garbage 
 
@@ -25,4 +26,3 @@ nix-collect-garbage -d
 - [home-manager](https://github.com/nix-community/home-manager)
 - [home-manager manual](https://nix-community.github.io/home-manager/)
 - [home-manager options](https://home-manager-options.extranix.com/)
-

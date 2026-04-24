@@ -1,18 +1,63 @@
-{ ... }:
+{
+  inputs,
+  lib,
+  osConfig ? null,
+  pkgs,
+  ...
+}:
 
 let
-  ghosttyBin = "/usr/bin/ghostty";
+  chromePkgs = import inputs.nixpkgs-chrome {
+    system = pkgs.stdenv.hostPlatform.system;
+    config.allowUnfree = true;
+  };
+  telegramPkgs = import inputs.nixpkgs-telegram {
+    system = pkgs.stdenv.hostPlatform.system;
+    config.allowUnfree = true;
+  };
+  homeDirectory = "/home/evkon";
+  npmGlobalPrefix = "${homeDirectory}/.local/share/npm-global";
+  codexUpdate = pkgs.writeShellScriptBin "codex-update" ''
+    set -euo pipefail
+
+    export NPM_CONFIG_PREFIX=${lib.escapeShellArg npmGlobalPrefix}
+    mkdir -p "$NPM_CONFIG_PREFIX"
+    exec ${pkgs.nodejs_22}/bin/npm install --global @openai/codex@latest
+  '';
+  ghosttyPackage = if osConfig == null then null else pkgs.ghostty;
+  ghosttyBin = if ghosttyPackage == null then "/usr/bin/ghostty" else lib.getExe ghosttyPackage;
 in
 
 {
   home = {
     username = "evkon";
-    homeDirectory = "/home/evkon";
+    homeDirectory = homeDirectory;
+    sessionPath = [ "${npmGlobalPrefix}/bin" ];
+    sessionVariables = {
+      NPM_CONFIG_PREFIX = npmGlobalPrefix;
+    };
+    packages =
+      with pkgs;
+      [
+        bitwarden-desktop
+        jetbrains-toolbox
+        slack
+        zoom-us
+      ]
+      ++ [
+        chromePkgs.google-chrome
+        codexUpdate
+        telegramPkgs.telegram-desktop
+      ];
   };
+
+  programs.zsh.envExtra = lib.mkAfter ''
+    path=("${npmGlobalPrefix}/bin" $path)
+  '';
 
   programs.ghostty = {
     enable = true;
-    package = null;
+    package = ghosttyPackage;
     enableZshIntegration = true;
     systemd.enable = false;
 
@@ -38,4 +83,5 @@ in
 
     Install.WantedBy = [ "graphical-session.target" ];
   };
+
 }

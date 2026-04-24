@@ -1,0 +1,7 @@
+keys:
+  - &evkon_pc age1gk8qejkvhjfs6d9khszjrdc6pwyhuss06x8llsemqntatxh4v3cseycd7r
+creation_rules:
+  - path_regex: nixos/evkon-pc/secrets/[^/]+\.yaml$
+    key_groups:
+      - age:
+          - *evkon_pc

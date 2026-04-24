@@ -1,2 +1,7 @@
 /.claude/
+/.codex/
+/.codex
 
+/nixos/evkon-pc/secrets/*.plain.yaml
+/nixos/evkon-pc/secrets/*.decrypted.yaml
+/nixos/evkon-pc/secrets/*.tmp

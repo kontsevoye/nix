@@ -3,6 +3,12 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-chrome.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-telegram.url = "github:nixos/nixpkgs/nixos-unstable";
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -33,6 +39,7 @@
             system = system;
             config.allowUnfree = true;
           };
+          extraSpecialArgs = { inherit inputs; };
           modules = [
             ./home-manager/default.nix
             home
@@ -75,9 +82,28 @@
         "deck@steamdeck" = mkHome ./home-manager/machines/deck_at_steamdeck.nix "x86_64-linux" [
           ./home-manager/gui-apps.nix
         ];
-        "evkon@evkon-pc" = mkHome ./home-manager/machines/evkon_at_evkon_pc.nix "x86_64-linux" [];
+        "evkon@evkon-pc" = mkHome ./home-manager/machines/evkon_at_evkon_pc.nix "x86_64-linux" [ ];
       };
       nixosConfigurations = {
+        "evkon-pc" = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./nixos/evkon-pc
+            inputs.sops-nix.nixosModules.sops
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.users.evkon = {
+                imports = [
+                  ./home-manager/default.nix
+                  ./home-manager/machines/evkon_at_evkon_pc.nix
+                ];
+              };
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.extraSpecialArgs = { inherit inputs; };
+            }
+          ];
+        };
         nixos = nixpkgs.lib.nixosSystem {
           modules = [
             nixos-wsl.nixosModules.default
