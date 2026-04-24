@@ -154,6 +154,7 @@
       age
       alsa-utils
       btrfs-progs
+      bubblewrap
       crosspipe
       curl
       git
