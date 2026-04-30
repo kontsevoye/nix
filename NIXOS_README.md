@@ -96,7 +96,7 @@ For the current layout:
 sudo mount -o subvol=root,compress=zstd:1,ssd,discard=async /dev/disk/by-uuid/faaed0a5-1cbf-4218-8114-21a985dab993 /mnt
 sudo mkdir -p /mnt/home /mnt/boot
 sudo mount -o subvol=home,compress=zstd:1,ssd,discard=async /dev/disk/by-uuid/faaed0a5-1cbf-4218-8114-21a985dab993 /mnt/home
-sudo mount /dev/disk/by-uuid/801B-B94D /mnt/boot
+sudo mount -o umask=0077,shortname=winnt /dev/disk/by-uuid/801B-B94D /mnt/boot
 ```
 
 If you want encrypted secrets to be applied during the first install, copy the private age identity before running `nixos-install`:
