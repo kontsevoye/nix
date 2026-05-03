@@ -70,9 +70,16 @@
     };
   };
 
-  programs.zsh.enable = true;
-  programs.kdeconnect.enable = true;
-  programs.steam.enable = true;
+  programs = {
+    zsh.enable = true;
+    kdeconnect.enable = true;
+    steam.enable = true;
+
+    chromium = {
+      enable = true;
+      enablePlasmaBrowserIntegration = true;
+    };
+  };
 
   security = {
     rtkit.enable = true;
@@ -83,7 +90,10 @@
     xserver = {
       enable = true;
       videoDrivers = [ "nvidia" ];
-      xkb.layout = "us";
+      xkb = {
+        layout = "us,ru";
+        options = "grp:caps_toggle";
+      };
     };
 
     displayManager.sddm = {
@@ -163,11 +173,14 @@
       ntfs3g
       pavucontrol
       pciutils
+      kdePackages.xdg-desktop-portal-kde
       sops
       usbutils
       vim
       vulkan-tools
       wget
+      xdg-desktop-portal
+      yandex-music
     ];
   };
 

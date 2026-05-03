@@ -42,7 +42,6 @@ in
         bitwarden-desktop
         jetbrains-toolbox
         slack
-        zoom-us
       ]
       ++ [
         chromePkgs.google-chrome
@@ -62,7 +61,32 @@ in
     systemd.enable = false;
 
     settings = {
-      keybind = [ "global:ctrl+backquote=toggle_quick_terminal" ];
+      keybind = [
+        "ctrl+shift+comma=reload_config"
+        "ctrl+comma=open_config"
+        "ctrl+shift+key_c=copy_to_clipboard:mixed"
+        "ctrl+shift+key_v=paste_from_clipboard"
+        "ctrl+equal=increase_font_size:1"
+        "ctrl+shift+equal=increase_font_size:1"
+        "ctrl+minus=decrease_font_size:1"
+        "ctrl+digit_0=reset_font_size"
+        "super+ctrl+shift+key_j=write_screen_file:copy,plain"
+        "ctrl+shift+key_j=write_screen_file:paste,plain"
+        "ctrl+alt+shift+key_j=write_screen_file:open,plain"
+        "ctrl+shift+key_n=new_window"
+        "ctrl+shift+key_w=close_tab:this"
+        "ctrl+shift+key_q=quit"
+        "ctrl+shift+key_t=new_tab"
+        "ctrl+shift+key_o=new_split:right"
+        "ctrl+shift+key_e=new_split:down"
+        "super+ctrl+bracket_left=goto_split:previous"
+        "super+ctrl+bracket_right=goto_split:next"
+        "ctrl+shift+key_f=start_search"
+        "ctrl+shift+key_i=inspector:toggle"
+        "ctrl+shift+key_a=select_all"
+        "ctrl+shift+key_p=toggle_command_palette"
+        "global:ctrl+backquote=toggle_quick_terminal"
+      ];
       quick-terminal-position = "top";
       quick-terminal-size = "40%";
       quick-terminal-autohide = false;

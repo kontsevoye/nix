@@ -11,8 +11,26 @@ let
     "com.github.tchx84.Flatseal"
     "io.github.giantpinkrobots.flatsweep"
     "io.github.sigmasd.stimulator"
+    "us.zoom.Zoom"
   ];
+  flatpakOverrides = {
+    "us.zoom.Zoom" = [
+      "--nosocket=wayland"
+      "--socket=x11"
+      "--env=QT_QPA_PLATFORM=xcb"
+    ];
+  };
   managedAppsFile = pkgs.writeText "evkon-pc-flatpak-apps" (lib.concatLines managedApps);
+  flatpakOverridesFile = pkgs.writeText "evkon-pc-flatpak-overrides" (
+    builtins.toJSON flatpakOverrides
+  );
+  flatpakOverrideScript = lib.concatStringsSep "\n" (
+    lib.mapAttrsToList (appId: args: ''
+      if [ "$app" = ${lib.escapeShellArg appId} ]; then
+        flatpak override --system ${lib.concatMapStringsSep " " lib.escapeShellArg args} "$app"
+      fi
+    '') flatpakOverrides
+  );
 in
 {
   services.flatpak.enable = true;
@@ -24,7 +42,10 @@ in
     wantedBy = [ "multi-user.target" ];
     wants = [ "network-online.target" ];
     after = [ "network-online.target" ];
-    restartTriggers = [ managedAppsFile ];
+    restartTriggers = [
+      managedAppsFile
+      flatpakOverridesFile
+    ];
     path = with pkgs; [
       coreutils
       flatpak
@@ -49,6 +70,8 @@ in
         else
           flatpak install --system -y flathub "$app"
         fi
+
+        ${flatpakOverrideScript}
       done < ${managedAppsFile}
 
       flatpak list --system --app --columns=application | while IFS= read -r installed; do
