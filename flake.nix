@@ -32,12 +32,18 @@
       ...
     }:
     let
+      overlays = import ./shared/overlays.nix;
+      permittedInsecurePackages = import ./shared/permitted-insecure-packages.nix;
       mkHome =
         home: system: extraModules:
         home-manager.lib.homeManagerConfiguration {
           pkgs = import nixpkgs {
             system = system;
-            config.allowUnfree = true;
+            inherit overlays;
+            config = {
+              allowUnfree = true;
+              inherit permittedInsecurePackages;
+            };
           };
           extraSpecialArgs = { inherit inputs; };
           modules = [

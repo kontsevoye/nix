@@ -7,13 +7,20 @@
 }:
 
 let
+  permittedInsecurePackages = import ../../shared/permitted-insecure-packages.nix;
   chromePkgs = import inputs.nixpkgs-chrome {
     system = pkgs.stdenv.hostPlatform.system;
-    config.allowUnfree = true;
+    config = {
+      allowUnfree = true;
+      inherit permittedInsecurePackages;
+    };
   };
   telegramPkgs = import inputs.nixpkgs-telegram {
     system = pkgs.stdenv.hostPlatform.system;
-    config.allowUnfree = true;
+    config = {
+      allowUnfree = true;
+      inherit permittedInsecurePackages;
+    };
   };
   homeDirectory = "/home/evkon";
   npmGlobalPrefix = "${homeDirectory}/.local/share/npm-global";
@@ -54,6 +61,22 @@ in
     path=("${npmGlobalPrefix}/bin" $path)
   '';
 
+  programs.zsh.initContent = lib.mkAfter ''
+    if [[ ''${TERM_PROGRAM:-} == "ghostty" ]]; then
+      # Keep Ghostty new tabs opening in the current directory.
+      _evkon_ghostty_report_pwd() {
+        builtin printf '\e]7;kitty-shell-cwd://localhost%s\a' "$PWD" > /dev/tty 2>/dev/null
+      }
+
+      autoload -Uz add-zsh-hook
+      add-zsh-hook -d chpwd _evkon_ghostty_report_pwd 2>/dev/null || true
+      add-zsh-hook -d precmd _evkon_ghostty_report_pwd 2>/dev/null || true
+      add-zsh-hook chpwd _evkon_ghostty_report_pwd
+      add-zsh-hook precmd _evkon_ghostty_report_pwd
+      _evkon_ghostty_report_pwd
+    fi
+  '';
+
   programs.ghostty = {
     enable = true;
     package = ghosttyPackage;
@@ -91,6 +114,7 @@ in
       quick-terminal-size = "40%";
       quick-terminal-autohide = false;
       gtk-quick-terminal-layer = "top";
+      tab-inherit-working-directory = true;
     };
   };
 

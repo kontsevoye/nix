@@ -26,7 +26,11 @@
     "cache.flakehub.com-10:2GqeNlIp6AKp4EF2MVbE1kBOp9iBSyo0UPR9KoR0o1Y="
   ];
 
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config = {
+    allowUnfree = true;
+    permittedInsecurePackages = import ./permitted-insecure-packages.nix;
+  };
+  nixpkgs.overlays = import ./overlays.nix;
 
   nix.gc = {
     automatic = true;
