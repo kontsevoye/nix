@@ -43,6 +43,34 @@
         enable = true;
         configurationLimit = 10;
         editor = false;
+        extraEntries."windows_11.conf" = ''
+          title Windows 11
+          efi /EFI/Microsoft/Boot/bootmgfw.efi
+          sort-key o_windows
+        '';
+        extraInstallCommands = ''
+          windows_esp="/run/windows-esp"
+          ${pkgs.coreutils}/bin/mkdir -p "$windows_esp" "${config.boot.loader.efi.efiSysMountPoint}/EFI"
+          if ! ${pkgs.util-linux}/bin/findmnt "$windows_esp" > /dev/null; then
+            ${pkgs.util-linux}/bin/mount -o ro /dev/disk/by-uuid/24E3-376D "$windows_esp"
+          fi
+          if [ -d "$windows_esp/EFI/Microsoft" ]; then
+            ${pkgs.coreutils}/bin/cp -R "$windows_esp/EFI/Microsoft" "${config.boot.loader.efi.efiSysMountPoint}/EFI/"
+          fi
+
+          loader_conf="${config.boot.loader.efi.efiSysMountPoint}/loader/loader.conf"
+          if ${pkgs.gnugrep}/bin/grep -q '^auto-entries ' "$loader_conf"; then
+            ${pkgs.gnused}/bin/sed -i 's/^auto-entries .*/auto-entries yes/' "$loader_conf"
+          else
+            printf 'auto-entries yes\n' >> "$loader_conf"
+          fi
+
+          if ${pkgs.gnugrep}/bin/grep -q '^default ' "$loader_conf"; then
+            ${pkgs.gnused}/bin/sed -i 's/^default .*/default windows_11.conf/' "$loader_conf"
+          else
+            printf 'default windows_11.conf\n' >> "$loader_conf"
+          fi
+        '';
       };
     };
     kernelParams = [
@@ -168,13 +196,36 @@
       crosspipe
       curl
       git
+      gnome-disk-utility
+      gptfdisk
       libva-utils
       mesa-demos
       ntfs3g
       pavucontrol
       pciutils
+      parted
+      kdePackages.partitionmanager
       kdePackages.xdg-desktop-portal-kde
       sops
+      (writeShellApplication {
+        name = "boot-windows";
+        runtimeInputs = [
+          systemd
+        ];
+        text = ''
+          bootctl set-oneshot windows_11.conf
+          systemctl reboot
+        '';
+      })
+      (writeShellApplication {
+        name = "boot-loader-menu";
+        runtimeInputs = [
+          systemd
+        ];
+        text = ''
+          systemctl reboot --boot-loader-menu=10
+        '';
+      })
       usbutils
       vim
       vulkan-tools
