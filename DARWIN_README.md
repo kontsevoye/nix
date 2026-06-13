@@ -20,3 +20,11 @@ nix flake update .
 # run inside current directory or change "." to the actual location
 darwin-rebuild switch --flake .
 ```
+
+## NPM tools
+
+`@musistudio/claude-code-router` is installed through npm instead of nixpkgs. The Mac Home Manager profile provides a `claude-code-router-update` command that installs or updates `@musistudio/claude-code-router@latest`.
+
+```bash
+claude-code-router-update
+```

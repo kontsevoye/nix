@@ -80,6 +80,7 @@ in
     name = username;
     home = "/Users/${username}";
   };
+  home-manager.backupFileExtension = "before-home-manager";
   home-manager.users."${username}" = {
     imports = [
       ../home-manager/default.nix
