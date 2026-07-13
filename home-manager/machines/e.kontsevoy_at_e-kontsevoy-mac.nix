@@ -21,6 +21,12 @@ let
   codexAuto = pkgs.writeShellScriptBin "codex-auto" ''
     exec codex --profile auto "$@"
   '';
+  codexAutoConfig = pkgs.writeText "codex-auto.config.toml" ''
+    # Let Codex review eligible approval requests while keeping commands sandboxed.
+    approval_policy = "on-request"
+    approvals_reviewer = "auto_review"
+    sandbox_mode = "workspace-write"
+  '';
 in
 {
   home = {
@@ -40,11 +46,19 @@ in
     ];
   };
 
-  home.file.".codex/auto.config.toml".text = ''
-    # Let Codex review eligible approval requests while keeping commands sandboxed.
-    approval_policy = "on-request"
-    approvals_reviewer = "auto_review"
-    sandbox_mode = "workspace-write"
+  home.activation.initializeCodexAutoConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    config_file=${lib.escapeShellArg "${homeDirectory}/.codex/auto.config.toml"}
+
+    # Migrate the read-only file created by the previous home.file definition.
+    if [ -L "$config_file" ] && [[ "$(readlink "$config_file")" == /nix/store/* ]]; then
+      run rm "$config_file"
+    fi
+
+    # Keep the profile mutable so the Codex TUI can persist model selections.
+    if [ ! -e "$config_file" ]; then
+      run mkdir -p "$(dirname "$config_file")"
+      run install -m 600 ${codexAutoConfig} "$config_file"
+    fi
   '';
 
   programs.zsh.envExtra = lib.mkAfter ''

@@ -46,3 +46,7 @@ codex-auto
 ```
 
 The regular `codex` command keeps its existing approval behavior.
+
+The `auto` profile is initialized as a writable `~/.codex/auto.config.toml`.
+Home Manager does not overwrite it on later rebuilds, so model changes made in
+the Codex TUI persist.
