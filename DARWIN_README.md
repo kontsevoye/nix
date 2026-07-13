@@ -34,3 +34,15 @@ claude-code-router-update
 ```bash
 openclaude-update
 ```
+
+## Codex auto mode
+
+The Mac Home Manager profile installs a `codex-auto` command. It starts Codex
+with the `auto` profile: commands remain restricted to the workspace sandbox,
+while Codex's reviewer subagent handles eligible approval requests.
+
+```bash
+codex-auto
+```
+
+The regular `codex` command keeps its existing approval behavior.
