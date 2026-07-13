@@ -10,6 +10,13 @@ let
     mkdir -p "$NPM_CONFIG_PREFIX"
     exec ${pkgs.nodejs_22}/bin/npm install --global @musistudio/claude-code-router@latest
   '';
+  openClaudeUpdate = pkgs.writeShellScriptBin "openclaude-update" ''
+    set -euo pipefail
+
+    export NPM_CONFIG_PREFIX=${lib.escapeShellArg npmGlobalPrefix}
+    mkdir -p "$NPM_CONFIG_PREFIX"
+    exec ${pkgs.nodejs_22}/bin/npm install --global @gitlawb/openclaude@latest
+  '';
 in
 {
   home = {
@@ -19,7 +26,10 @@ in
     sessionVariables = {
       NPM_CONFIG_PREFIX = npmGlobalPrefix;
     };
-    packages = [ claudeCodeRouterUpdate ];
+    packages = [
+      claudeCodeRouterUpdate
+      openClaudeUpdate
+    ];
   };
 
   programs.zsh.envExtra = lib.mkAfter ''

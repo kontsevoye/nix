@@ -28,3 +28,9 @@ darwin-rebuild switch --flake .
 ```bash
 claude-code-router-update
 ```
+
+`@gitlawb/openclaude` is also installed through npm. The Mac Home Manager profile provides an `openclaude-update` command that installs or updates `@gitlawb/openclaude@latest`.
+
+```bash
+openclaude-update
+```
