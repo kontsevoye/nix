@@ -27,6 +27,14 @@ let
     approvals_reviewer = "auto_review"
     sandbox_mode = "workspace-write"
   '';
+  codexYolo = pkgs.writeShellScriptBin "codex-yolo" ''
+    exec codex --profile yolo "$@"
+  '';
+  codexYoloConfig = pkgs.writeText "codex-yolo.config.toml" ''
+    # Run without approval prompts or sandbox restrictions.
+    approval_policy = "never"
+    sandbox_mode = "danger-full-access"
+  '';
 in
 {
   home = {
@@ -42,6 +50,7 @@ in
     packages = [
       claudeCodeRouterUpdate
       codexAuto
+      codexYolo
       openClaudeUpdate
     ];
   };
@@ -58,6 +67,16 @@ in
     if [ ! -e "$config_file" ]; then
       run mkdir -p "$(dirname "$config_file")"
       run install -m 600 ${codexAutoConfig} "$config_file"
+    fi
+  '';
+
+  home.activation.initializeCodexYoloConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    config_file=${lib.escapeShellArg "${homeDirectory}/.codex/yolo.config.toml"}
+
+    # Keep the profile mutable so the Codex TUI can persist model selections.
+    if [ ! -e "$config_file" ]; then
+      run mkdir -p "$(dirname "$config_file")"
+      run install -m 600 ${codexYoloConfig} "$config_file"
     fi
   '';
 

@@ -50,3 +50,18 @@ The regular `codex` command keeps its existing approval behavior.
 The `auto` profile is initialized as a writable `~/.codex/auto.config.toml`.
 Home Manager does not overwrite it on later rebuilds, so model changes made in
 the Codex TUI persist.
+
+## Codex YOLO mode
+
+The Mac Home Manager profile also installs a `codex-yolo` command. It starts
+Codex without approval prompts or sandbox restrictions:
+
+```bash
+codex-yolo
+```
+
+This mode gives Codex unrestricted access to files, commands, and the network.
+Use it only in an environment where that level of access is intentional.
+
+The `yolo` profile is initialized as a writable `~/.codex/yolo.config.toml`, so
+model changes made in the Codex TUI persist across Home Manager rebuilds.
