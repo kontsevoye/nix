@@ -53,7 +53,6 @@ in
       claudeCodeRouterUpdate
       codexAuto
       codexYolo
-      pkgs.ghostty-pr-9857
       openClaudeUpdate
     ];
   };
@@ -82,6 +81,46 @@ in
       run install -m 600 ${codexYoloConfig} "$config_file"
     fi
   '';
+
+  programs.ghostty = {
+    # Manage Ghostty with Home Manager.
+    enable = true;
+    # Use the pinned quick-terminal tabs revision.
+    package = pkgs.ghostty-pr-9857;
+
+    settings = {
+      # Use the iTerm2 profile font.
+      font-family = "Hack Nerd Font Mono";
+      # Match the iTerm2 font size.
+      font-size = 13;
+      # Add vertical spacing between lines.
+      adjust-cell-height = "10%";
+      # Keep selections out of the clipboard.
+      copy-on-select = false;
+      # Preserve native macOS Option behavior.
+      macos-option-as-alt = false;
+      # Keep the cursor steady.
+      cursor-style-blink = false;
+      # Keep all terminal history.
+      scrollback-limit-bytes = "unlimited";
+      # Close terminals without confirmation.
+      confirm-close-surface = false;
+      # Toggle the terminal from any application.
+      keybind = [ "global:ctrl+backquote=toggle_quick_terminal" ];
+      # Drop down from the screen top.
+      quick-terminal-position = "top";
+      # Use forty percent of screen height.
+      quick-terminal-size = "40%";
+      # Follow the screen under the pointer.
+      quick-terminal-screen = "mouse";
+      # Show and hide without animation.
+      quick-terminal-animation-duration = 0;
+      # Hide when focus moves elsewhere.
+      quick-terminal-autohide = true;
+      # Follow the active macOS Space.
+      quick-terminal-space-behavior = "move";
+    };
+  };
 
   programs.zsh.envExtra = lib.mkAfter ''
     path=("${npmGlobalPrefix}/bin" $path)
