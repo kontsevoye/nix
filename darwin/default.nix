@@ -66,7 +66,6 @@ in
       "openvpn-connect"
       "zoom"
       "localsend"
-      "ghostty"
       "claude"
       "claude-code@latest"
       "codex"

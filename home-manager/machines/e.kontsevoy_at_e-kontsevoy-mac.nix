@@ -4,6 +4,7 @@ let
   homeDirectory = "/Users/e.kontsevoy";
   npmGlobalPrefix = "${homeDirectory}/.local/share/npm-global";
   orbStackBin = "${homeDirectory}/.orbstack/bin";
+  codexStandaloneBin = "${homeDirectory}/.codex/packages/standalone/current/bin";
   claudeCodeRouterUpdate = pkgs.writeShellScriptBin "claude-code-router-update" ''
     set -euo pipefail
 
@@ -43,6 +44,7 @@ in
     sessionPath = [
       "${npmGlobalPrefix}/bin"
       orbStackBin
+      codexStandaloneBin
     ];
     sessionVariables = {
       NPM_CONFIG_PREFIX = npmGlobalPrefix;
@@ -51,6 +53,7 @@ in
       claudeCodeRouterUpdate
       codexAuto
       codexYolo
+      pkgs.ghostty-pr-9857
       openClaudeUpdate
     ];
   };
@@ -83,5 +86,6 @@ in
   programs.zsh.envExtra = lib.mkAfter ''
     path=("${npmGlobalPrefix}/bin" $path)
     path=("${orbStackBin}" $path)
+    path=("${codexStandaloneBin}" $path)
   '';
 }
