@@ -33,7 +33,9 @@ in
     enable = true;
     onActivation.cleanup = "zap";
     global.brewfile = true;
+    taps = [ "asheshgoplani/tap" ];
     brews = [
+      "agent-deck"
       "mas"
       "yubico-piv-tool"
     ];
