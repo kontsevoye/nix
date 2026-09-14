@@ -35,7 +35,10 @@ in
     global.brewfile = true;
     taps = [ "asheshgoplani/tap" ];
     brews = [
-      "agent-deck"
+      {
+        name = "asheshgoplani/tap/agent-deck";
+        trusted = true;
+      }
       "mas"
       "yubico-piv-tool"
     ];
