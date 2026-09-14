@@ -18,7 +18,7 @@ nix flake update .
 
 ```bash
 # run inside current directory or change "." to the actual location
-darwin-rebuild switch --flake .
+sudo darwin-rebuild switch --flake .
 ```
 
 ## NPM tools

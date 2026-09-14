@@ -79,12 +79,12 @@ in
 
   home.packages =
     commonPackages
-    ++ lib.optionals pkgs.stdenv.isLinux linuxPackages
-    ++ lib.optionals pkgs.stdenv.isDarwin darwinPackages;
+    ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux linuxPackages
+    ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin darwinPackages;
 
   home.file = {
     ".gnupg/gpg-agent.conf".text = (
-      if (pkgs.stdenv.isDarwin) then
+      if (pkgs.stdenv.hostPlatform.isDarwin) then
         ''
           pinentry-program ${pkgs.pinentry_mac}/bin/pinentry-mac
         ''
@@ -237,7 +237,7 @@ in
       ZSH_CACHE_DIR = "${config.home.homeDirectory}/.zsh_cache";
     };
     envExtra =
-      lib.optionalString pkgs.stdenv.isDarwin ''
+      lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
         # Homebrew envs
         if [[ -x /opt/homebrew/bin/brew ]]; then
           eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -254,7 +254,7 @@ in
         path=("$HOME/go/bin" $path)
         path=("$HOME/.local/bin" $path)
       ''
-      + lib.optionalString pkgs.stdenv.isDarwin ''
+      + lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
         path=("$HOME/Library/Application Support/JetBrains/Toolbox/scripts" $path)
       '';
   };

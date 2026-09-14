@@ -14,7 +14,8 @@
 }:
 
 let
-  rev = "d68bd060ea4f38c7f8d3426355238b14936801fb";
+  # Head of adrum/ghostty's feat/quickterm-with-tab branch (PR #9857).
+  rev = "d62f7ea2bd9d9603e6abbf3ed52e34025d40b61c";
   version = "1.3.2-dev+pr9857.${builtins.substring 0 8 rev}";
   metalToolchain = "com.apple.dt.toolchain.Metal.32023.883";
 
@@ -22,7 +23,7 @@ let
     owner = "ghostty-org";
     repo = "ghostty";
     inherit rev;
-    hash = "sha256-h3n7ETZqm+RPICEJMmXXAUG0zoGTOoNuKpIU1KmnkI8=";
+    hash = "sha256-fVzPIAXTgq8t84xN+dwLiDk4qkYZl2BbxywLifz1Qfg=";
   };
 
   zigArtifacts = stdenvNoCC.mkDerivation {
@@ -53,7 +54,7 @@ let
 
     outputHashMode = "recursive";
     outputHashAlgo = "sha256";
-    outputHash = "sha256-iBAdrRgKY3nK0FzTT1Uz/FN37KyEMXUK1J/m2oxKMjA=";
+    outputHash = "sha256-Vf3OapiX01msUgnrMmnVP8WTV7YUYOMQRAzhfHuqqtY=";
   };
 
   # Zig 0.16 caches remote artifacts as archives, while --system expects
