@@ -21,6 +21,7 @@
       url = "github:lnl7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    determinate-nix.url = "github:DeterminateSystems/nix-src/v3.22.3";
   };
 
   outputs =
@@ -132,6 +133,7 @@
       };
       darwinConfigurations = {
         "e-kontsevoy-mac" = darwin.lib.darwinSystem {
+          specialArgs = { inherit inputs; };
           modules = [
             ./darwin/default.nix
             home-manager.darwinModules.home-manager

@@ -1,4 +1,9 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 
 let
   username = "e.kontsevoy";
@@ -7,6 +12,13 @@ in
   imports = [ ../shared/nix-settings.nix ];
 
   nix.enable = true;
+  # Use the open-source engine; nix-darwin still manages the daemon and GC.
+  nix.package = inputs.determinate-nix.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  nix.settings = {
+    lazy-trees = true;
+    eval-cores = 0;
+    extra-substituters = lib.mkAfter [ "https://install.determinate.systems" ];
+  };
   nix.settings.trusted-users = lib.mkAfter [ username ];
   nix.gc.interval = {
     Weekday = 0;

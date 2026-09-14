@@ -21,6 +21,45 @@ nix flake update .
 sudo darwin-rebuild switch --flake .
 ```
 
+## Nix engine
+
+The Mac uses the open-source Determinate Nix engine from
+`DeterminateSystems/nix-src`, pinned to release `v3.22.3` in `flake.nix` and to an
+exact revision in `flake.lock`. nix-darwin still manages the standard Nix daemon,
+configuration, build users, and garbage collection (`nix.enable = true`). This
+does not install `determinate-nixd` or the Determinate installer/module.
+
+`darwin/default.nix` enables lazy trees and evaluation across all CPU cores. It
+also adds the public `https://install.determinate.systems` binary cache; its
+signing keys are already declared in `shared/nix-settings.nix`. Linux hosts keep
+their existing Nix package and settings.
+
+To upgrade the engine, change its release tag in `flake.nix`, then run:
+
+```bash
+nix flake update determinate-nix
+nix build .#darwinConfigurations.e-kontsevoy-mac.system --no-link
+sudo darwin-rebuild switch --flake .
+```
+
+Keep the engine's own nixpkgs input: making it follow the system's nixpkgs can
+change its dependency set and cause binary-cache misses.
+
+### Roll back the engine trial
+
+Before the 2026-09-14 trial, generation **36** used upstream Nix **2.34.8**.
+To reactivate that generation without evaluating the modified flake:
+
+```bash
+sudo /nix/store/j4ri6vb80p9rjqfspc0w49klchlkncy6-darwin-system-26.11.4cff07d/sw/bin/darwin-rebuild --switch-generation 36
+```
+
+This rolls back the active system, not the repository. For a permanent return to
+upstream Nix, remove the `determinate-nix` input, its `nix.package` assignment,
+the `lazy-trees` and `eval-cores` settings, and the Determinate cache from the
+Darwin module. Remove the now-unused `inputs` module argument and Darwin
+`specialArgs`, run `nix flake lock`, then rebuild and switch normally.
+
 ## NPM tools
 
 `@musistudio/claude-code-router` is installed through npm instead of nixpkgs. The Mac Home Manager profile provides a `claude-code-router-update` command that installs or updates `@musistudio/claude-code-router@latest`.
