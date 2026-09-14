@@ -5,6 +5,11 @@ let
   npmGlobalPrefix = "${homeDirectory}/.local/share/npm-global";
   orbStackBin = "${homeDirectory}/.orbstack/bin";
   codexStandaloneBin = "${homeDirectory}/.codex/packages/standalone/current/bin";
+  # Keep Mozilla roots and the existing homelab CA available to Nix curl.
+  curlCaBundle = pkgs.runCommand "curl-homelab-ca-bundle.pem" { } ''
+    cat ${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt \
+      ${../../shared/certificates/homelab-root-ca.crt} > "$out"
+  '';
   claudeCodeRouterUpdate = pkgs.writeShellScriptBin "claude-code-router-update" ''
     set -euo pipefail
 
@@ -56,6 +61,10 @@ in
       openClaudeUpdate
     ];
   };
+
+  home.file.".curlrc".text = ''
+    cacert = "${curlCaBundle}"
+  '';
 
   home.activation.initializeCodexAutoConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     config_file=${lib.escapeShellArg "${homeDirectory}/.codex/auto.config.toml"}

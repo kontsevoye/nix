@@ -111,7 +111,7 @@
 
   security = {
     rtkit.enable = true;
-    pki.certificateFiles = [ ./homelab-root-ca.crt ];
+    pki.certificateFiles = [ ../../shared/certificates/homelab-root-ca.crt ];
   };
 
   services = {
