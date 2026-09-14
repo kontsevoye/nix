@@ -104,6 +104,8 @@ in
       font-size = 13;
       # Add vertical spacing between lines.
       adjust-cell-height = "10%";
+      # Make underlines more visible.
+      adjust-underline-thickness = 1;
       # Keep selections out of the clipboard.
       copy-on-select = false;
       # Preserve native macOS Option behavior.
