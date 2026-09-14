@@ -116,8 +116,12 @@ in
       scrollback-limit-bytes = "unlimited";
       # Close terminals without confirmation.
       confirm-close-surface = false;
-      # Toggle the terminal from any application.
-      keybind = [ "global:ctrl+backquote=toggle_quick_terminal" ];
+      keybind = [
+        # Toggle the terminal from any application.
+        "global:ctrl+backquote=toggle_quick_terminal"
+        # Delete the previous word like iTerm2.
+        "alt+backspace=text:\\x1b\\x7f"
+      ];
       # Drop down from the screen top.
       quick-terminal-position = "top";
       # Use forty percent of screen height.
@@ -132,6 +136,9 @@ in
       quick-terminal-space-behavior = "move";
     };
   };
+
+  # Use macOS-style shell editing.
+  programs.zsh.defaultKeymap = "emacs";
 
   programs.zsh.envExtra = lib.mkAfter ''
     path=("${npmGlobalPrefix}/bin" $path)
