@@ -104,6 +104,16 @@ The `auto` profile is initialized as a writable `~/.codex/auto.config.toml`.
 Home Manager does not overwrite it on later rebuilds, so model changes made in
 the Codex TUI persist.
 
+In principle, the built-in `--approve-for-me` flag can replace the profile's
+permission settings: `approval_policy = "on-request"`,
+`approvals_reviewer = "auto_review"`, and `sandbox_mode = "workspace-write"`.
+The separate `auto` profile could therefore be removed if its model, reasoning,
+and other profile-specific preferences are no longer needed or are moved to the
+regular configuration. The flag is not marked experimental in CLI 0.157.1, and
+`codex features list` reports `guardian_approval` as stable. This potential
+simplification still requires the explicit `--remote unix://` connection in
+0.157.1 because the flag alone also selects embedded mode.
+
 Verified with CLI and daemon 0.157.1: `/status` shows the local Unix socket,
 `Workspace (Approve for me)`, the selected profile's model/reasoning, and the
 requested working directory. Exiting reports that running work continues and
