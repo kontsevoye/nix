@@ -86,9 +86,28 @@ codex-auto
 
 The regular `codex` command keeps its existing approval behavior.
 
+The wrapper ensures the local app-server daemon is running and connects with
+`codex --remote unix:// --profile auto`. In Codex CLI 0.157.1, `--profile` disables
+automatic daemon selection; an explicit local socket connection keeps the
+profile and shared server together. `--approve-for-me` alone also triggers the
+embedded fallback in this version, so it is not a substitute for that connection.
+The shared server lets sessions continue after the terminal disconnects and
+makes them available through `codex agents`. Multi-agent tools are a separate
+setting and are enabled by default; the embedded-mode warning does not itself
+disable them.
+
+The wrapper passes the current working directory explicitly because remote
+connections otherwise inherit the server's directory. An explicit `-C` or `--cd`
+takes precedence; other arguments are forwarded to Codex.
+
 The `auto` profile is initialized as a writable `~/.codex/auto.config.toml`.
 Home Manager does not overwrite it on later rebuilds, so model changes made in
 the Codex TUI persist.
+
+Verified with CLI and daemon 0.157.1: `/status` shows the local Unix socket,
+`Workspace (Approve for me)`, the selected profile's model/reasoning, and the
+requested working directory. Exiting reports that running work continues and
+offers the `agents` command. No model task or subagent was started for this check.
 
 ## Codex YOLO mode
 

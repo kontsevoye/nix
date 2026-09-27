@@ -25,7 +25,20 @@ let
     exec ${pkgs.nodejs_22}/bin/npm install --global @gitlawb/openclaude@latest
   '';
   codexAuto = pkgs.writeShellScriptBin "codex-auto" ''
-    exec codex --profile auto "$@"
+    set -euo pipefail
+
+    # Explicit remote connections otherwise inherit the server's working directory.
+    cwd_args=(--cd "$PWD")
+    for arg in "$@"; do
+      case "$arg" in
+        -C|--cd|-C?*|--cd=*) cwd_args=(); break ;;
+        --) break ;;
+      esac
+    done
+
+    # Profiles bypass automatic daemon selection; explicitly use the local server.
+    codex app-server daemon start >/dev/null
+    exec codex --remote unix:// --profile auto "''${cwd_args[@]}" "$@"
   '';
   codexAutoConfig = pkgs.writeText "codex-auto.config.toml" ''
     # Let Codex review eligible approval requests while keeping commands sandboxed.
