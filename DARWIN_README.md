@@ -119,6 +119,94 @@ Verified with CLI and daemon 0.157.1: `/status` shows the local Unix socket,
 requested working directory. Exiting reports that running work continues and
 offers the `agents` command. No model task or subagent was started for this check.
 
+## Agent Deck integration
+
+Agent Deck is installed independently at `~/go/bin/agent-deck` (audited version
+1.16.22). Home Manager provides `agent-deck-configure` and runs it at activation.
+It updates only these settings in the mutable `~/.config/agent-deck/config.toml`:
+
+```toml
+[tmux]
+socket_name = "agent-deck"
+
+[ui]
+embedded_terminal = true
+
+[updates]
+check_enabled = true
+auto_install = false
+auto_restart = false
+auto_update_remotes = false
+```
+
+Other settings and comments are preserved. Before changing a file, the helper
+creates `config.toml.before-my-nix-<timestamp>` beside it; unchanged files are
+not rewritten. These keys are managed by Nix, so subsequent activation restores
+them if they were changed in the Settings UI. Update Agent Deck manually with
+`agent-deck update`.
+
+New Agent Deck sessions use the separate `tmux -L agent-deck` server. Existing
+sessions retain their stored socket, including across `session restart`:
+changing the default does not move live processes or saved session records.
+Finish existing work on its current socket and create new sessions to use the
+isolated server. There is no built-in socket migration command in 1.16.22.
+
+The embedded layout keeps a session sidebar next to the interactive terminal:
+Enter focuses the terminal, Alt+Enter opens a full-screen attach, and Ctrl+Q
+returns to the dashboard. Restart the Agent Deck TUI after changing this setting.
+
+### Codex notifications and the shared server
+
+When launched by Agent Deck, `codex-auto` captures `AGENTDECK_INSTANCE_ID` and
+`AGENTDECK_PROFILE` in a per-session `notify` override. The notification bridge
+runs both the existing notification command (Computer Use on this Mac) and
+`agent-deck codex-notify`. It forwards the original arguments without shell
+evaluation, runs the callbacks independently with timeouts, and gives only the
+Agent Deck callback the captured identity. This avoids attributing events to
+whichever session originally started the shared daemon.
+
+The global `~/.codex/config.toml` notification remains unchanged. The override
+uses explicit `--remote unix://`, tested against CLI/server 0.159.3 with `/status`
+confirming the shared server, auto permissions and requested directory. Outside
+Agent Deck, `codex-auto` continues to use the original notification unchanged.
+`agent-deck codex-hooks status` still reports `CUSTOM_NOTIFY`, because that
+command inspects the global file rather than the per-session override. Do not
+replace Computer Use's global notify with `codex-hooks install`.
+
+### Apply and verify
+
+From this checkout:
+
+```bash
+sudo darwin-rebuild switch --flake .
+```
+
+Then quit the Agent Deck dashboard with `q` and launch `agent-deck` again.
+Existing agent tasks keep running when the dashboard exits. New Codex sessions
+use the notification bridge; restart older Codex sessions with `R` only after
+their current work is finished if they need the bridge too. The shared Codex
+daemon does not need a restart for the per-session override.
+
+After creating a new session:
+
+```bash
+tmux -L agent-deck ls
+agent-deck doctor
+```
+
+No proxy hostname is configured on this Mac. If Web UI is later exposed through
+a reverse proxy or Tailscale Serve, add its actual hostname to `[web].allowed_hosts`;
+1.16.22 rejects unlisted hosts with HTTP 421. Recall remains opt-in and disabled.
+
+Verified: both Nix packages and the complete Darwin system build; configuration
+updates preserve unrelated settings and are idempotent; callback tests cover exact payload forwarding,
+per-session identity overriding daemon identity, callback failure and timeout.
+The notification bridge has not yet been observed on a real completed model turn.
+
+References: [socket isolation](https://github.com/asheshgoplani/agent-deck/blob/v1.16.22/README.md#socket-isolation-v1750),
+[configuration](https://github.com/asheshgoplani/agent-deck/blob/v1.16.22/skills/agent-deck/references/config-reference.md),
+[1.16.22 changes](https://github.com/asheshgoplani/agent-deck/releases/tag/v1.16.22).
+
 ## Codex YOLO mode
 
 The Mac Home Manager profile also installs a `codex-yolo` command. It starts

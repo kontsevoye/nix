@@ -5,6 +5,17 @@ let
   npmGlobalPrefix = "${homeDirectory}/.local/share/npm-global";
   orbStackBin = "${homeDirectory}/.orbstack/bin";
   codexStandaloneBin = "${homeDirectory}/.codex/packages/standalone/current/bin";
+  codexAgentDeckNotify = pkgs.writeText "codex-agentdeck-notify.py" (
+    builtins.readFile ../codex-agentdeck-notify.py
+  );
+  agentDeckPython = pkgs.python312.withPackages (p: [ p.tomlkit ]);
+  agentDeckConfigureScript = pkgs.writeText "configure-agent-deck.py" (
+    builtins.readFile ../configure-agent-deck.py
+  );
+  agentDeckConfigure = pkgs.writeShellScriptBin "agent-deck-configure" ''
+    exec ${agentDeckPython}/bin/python3 ${agentDeckConfigureScript} \
+      ${lib.escapeShellArg "${homeDirectory}/.config/agent-deck/config.toml"}
+  '';
   # Keep Mozilla roots and the existing homelab CA available to Nix curl.
   curlCaBundle = pkgs.runCommand "curl-homelab-ca-bundle.pem" { } ''
     cat ${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt \
@@ -38,7 +49,14 @@ let
 
     # Profiles bypass automatic daemon selection; explicitly use the local server.
     codex app-server daemon start >/dev/null
-    exec codex --remote unix:// --profile auto "''${cwd_args[@]}" "$@"
+    notify_args=()
+    if [[ -n "''${AGENTDECK_INSTANCE_ID:-}" ]]; then
+      # Explicit --remote keeps shared-server mode with this per-session override
+      # (verified on CLI 0.159.3). Capture the frontend's identity for the daemon.
+      notify_override="$(${pkgs.python312}/bin/python3 ${codexAgentDeckNotify} config)"
+      notify_args=(-c "$notify_override")
+    fi
+    exec codex --remote unix:// --profile auto "''${cwd_args[@]}" "''${notify_args[@]}" "$@"
   '';
   codexAutoConfig = pkgs.writeText "codex-auto.config.toml" ''
     # Let Codex review eligible approval requests while keeping commands sandboxed.
@@ -68,6 +86,7 @@ in
       NPM_CONFIG_PREFIX = npmGlobalPrefix;
     };
     packages = [
+      agentDeckConfigure
       claudeCodeRouterUpdate
       codexAuto
       codexYolo
@@ -77,6 +96,12 @@ in
 
   home.file.".curlrc".text = ''
     cacert = "${curlCaBundle}"
+  '';
+
+  # Keep the file mutable for Agent Deck's Settings UI. Manage only these
+  # integration settings, preserving unrelated keys and backing up changes.
+  home.activation.configureAgentDeck = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    run ${agentDeckConfigure}/bin/agent-deck-configure
   '';
 
   home.activation.initializeCodexAutoConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
