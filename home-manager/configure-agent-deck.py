@@ -28,6 +28,14 @@ def main():
         if name not in config:
             config[name] = tomlkit.table()
         config[name].update(values)
+    # Codex does not request modifyOtherKeys in tmux. Force modified keys to
+    # reach it as CSI-u, while retaining the user's other tmux overrides.
+    if "options" not in config["tmux"]:
+        config["tmux"]["options"] = tomlkit.table()
+    config["tmux"]["options"].update({
+        "extended-keys": "always",
+        "extended-keys-format": "csi-u",
+    })
     after = tomlkit.dumps(config)
     tomlkit.parse(after)
     if after == before:

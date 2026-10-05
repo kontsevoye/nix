@@ -170,6 +170,10 @@ It updates only these settings in the mutable `~/.config/agent-deck/config.toml`
 [tmux]
 socket_name = "agent-deck"
 
+[tmux.options]
+extended-keys = "always"
+extended-keys-format = "csi-u"
+
 [ui]
 embedded_terminal = true
 
@@ -185,6 +189,21 @@ creates `config.toml.before-my-nix-<timestamp>` beside it; unchanged files are
 not rewritten. These keys are managed by Nix, so subsequent activation restores
 them if they were changed in the Settings UI. Update Agent Deck manually with
 `agent-deck update`.
+
+`extended-keys = "always"` preserves Shift+Enter even when an application
+does not request extended keyboard input. With Agent Deck 1.16.26 and Codex
+0.160.0, Codex panes remain in `VT10x` mode while Claude requests `Ext 2`;
+the default `on` therefore turns Shift+Enter into ordinary Enter for Codex.
+The `csi-u` format preserves the modifier for both applications. To update the
+running server without restarting sessions:
+
+```sh
+tmux -L agent-deck set-option -s extended-keys always
+tmux -L agent-deck set-option -s extended-keys-format csi-u
+```
+
+Restart the Agent Deck dashboard after activation so it reloads these overrides
+before creating more sessions. Existing agent processes can keep running.
 
 New Agent Deck sessions use the separate `tmux -L agent-deck` server. Existing
 sessions retain their stored socket, including across `session restart`:
