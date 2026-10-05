@@ -60,6 +60,47 @@ the `lazy-trees` and `eval-cores` settings, and the Determinate cache from the
 Darwin module. Remove the now-unused `inputs` module argument and Darwin
 `specialArgs`, run `nix flake lock`, then rebuild and switch normally.
 
+## Amphetamine and Power Protect
+
+`darwin/default.nix` declares Amphetamine (App Store ID `937984704`) through
+`programs.mas.packages`. MAS cleanup and automatic updates are disabled; the
+existing Homebrew `zap` cleanup remains separate from App Store apps.
+
+The same module installs [Power Protect](https://github.com/x74353/Amphetamine),
+the helper used for closed-display sessions on Apple Silicon. Its official
+`Files/powerProtect.scpt` is pinned to commit
+`84740c43c66ee9fae9e6f668a7c129e84e9fd352` with a SHA-256 hash. Activation copies
+it to `~/Library/Application Scripts/com.if.Amphetamine/powerProtect.scpt` as a
+regular file. An existing, different script is preserved as
+`powerProtect.scpt.before-nix-darwin` before the first replacement.
+
+Nix also manages `/etc/sudoers.d/amphetamine_PowerProtect`, preserving the
+official installer's permission for members of `admin` to run only these two
+commands without a password:
+
+```text
+/usr/bin/pmset -a disablesleep 1
+/usr/bin/pmset -a disablesleep 0
+```
+
+The recognized original sudoers file is backed up by nix-darwin during its
+first migration; unexpected contents cause activation to stop for review.
+Installing these files does not itself disable sleep. Amphetamine controls
+the sleep restriction while a session is running.
+
+Session settings remain in Amphetamine and are not overwritten by Nix. The
+configured power-adapter trigger keeps the Mac awake with its lid closed on
+AC power. A manually started session, such as **Indefinitely**, can do the
+same on battery when **Allow system sleep when display is closed** is off.
+Simply opening the app does not start a manual session. **Allow display sleep**
+can stay on in both cases. A low-battery session cutoff can be set in
+**Session Defaults**; it is currently disabled.
+
+After activation, `pmset -g` should show `SleepDisabled 1` during a
+closed-display session with Power Protect, and `SleepDisabled 0` after all
+such sessions end. Actual closed-lid operation and remote SSH still require
+a check from another device.
+
 ## NPM tools
 
 `@musistudio/claude-code-router` is installed through npm instead of nixpkgs. The Mac Home Manager profile provides a `claude-code-router-update` command that installs or updates `@musistudio/claude-code-router@latest`.
