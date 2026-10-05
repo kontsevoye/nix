@@ -15,7 +15,7 @@
 
 let
   # Head of adrum/ghostty's feat/quickterm-with-tab branch (PR #9857).
-  rev = "d62f7ea2bd9d9603e6abbf3ed52e34025d40b61c";
+  rev = "0dc5d8bd07ba839e371309e41b4a4cb11785c69c";
   version = "1.3.2-dev+pr9857.${builtins.substring 0 8 rev}";
   metalToolchain = "com.apple.dt.toolchain.Metal.32023.883";
 
@@ -23,7 +23,7 @@ let
     owner = "ghostty-org";
     repo = "ghostty";
     inherit rev;
-    hash = "sha256-fVzPIAXTgq8t84xN+dwLiDk4qkYZl2BbxywLifz1Qfg=";
+    hash = "sha256-esa3poU7b77/qldN7sfXoCoNqQOAoHde6DWTk7WoN3w=";
   };
 
   zigArtifacts = stdenvNoCC.mkDerivation {
@@ -54,7 +54,7 @@ let
 
     outputHashMode = "recursive";
     outputHashAlgo = "sha256";
-    outputHash = "sha256-Vf3OapiX01msUgnrMmnVP8WTV7YUYOMQRAzhfHuqqtY=";
+    outputHash = "sha256-pq6DrHhEcBzE9YoiGVmINBVtVWWtikbQibTlZMWbNtI=";
   };
 
   # Zig 0.16 caches remote artifacts as archives, while --system expects
@@ -163,8 +163,8 @@ stdenv.mkDerivation (finalAttrs: {
         rm -f macos/Ghostty.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
         substituteInPlace src/build/MetallibStep.zig \
-          --replace-fail '"/usr/bin/xcrun", "-sdk", sdk, "metal"' '"/usr/bin/xcrun", "--toolchain", "${metalToolchain}", "-sdk", sdk, "metal"' \
-          --replace-fail '"/usr/bin/xcrun", "-sdk", sdk, "metallib"' '"/usr/bin/xcrun", "--toolchain", "${metalToolchain}", "-sdk", sdk, "metallib"'
+          --replace-fail '"/usr/bin/xcrun", "-sdk", sdk, "metal"' '"/usr/bin/xcrun", "--no-cache", "--toolchain", "${metalToolchain}", "-sdk", sdk, "metal"' \
+          --replace-fail '"/usr/bin/xcrun", "-sdk", sdk, "metallib"' '"/usr/bin/xcrun", "--no-cache", "--toolchain", "${metalToolchain}", "-sdk", sdk, "metallib"'
 
         substituteInPlace src/build/GhosttyXcodebuild.zig \
           --replace-fail \
@@ -188,7 +188,8 @@ stdenv.mkDerivation (finalAttrs: {
       exit 1
     fi
 
-    if ! /usr/bin/xcrun --toolchain ${metalToolchain} metal -v >/dev/null; then
+    # OS updates can leave xcrun's cache pointing at Xcode's Metal stub.
+    if ! /usr/bin/xcrun --no-cache --toolchain ${metalToolchain} metal -v >/dev/null; then
       echo "Expected installed Metal toolchain ${metalToolchain}" >&2
       exit 1
     fi
