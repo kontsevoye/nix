@@ -136,6 +136,8 @@ in
     package = pkgs.ghostty-pr-9857;
 
     settings = {
+      # Install remote terminfo over SSH, falling back to xterm-256color.
+      shell-integration-features = "ssh-env,ssh-terminfo";
       # Use the iTerm2 profile font.
       font-family = "Hack Nerd Font Mono";
       # Match the iTerm2 font size.
