@@ -26,7 +26,7 @@ patch -p1 < "$script_dir/tmux-health-ui-budget.patch"
 go test ./internal/health -count=1
 go test ./internal/ui -run '^TestRuntimeHealth' -count=1
 CGO_ENABLED=0 go build -trimpath \
-  -ldflags '-s -w -X main.Version=1.16.26+tmux-health' \
+  -ldflags '-s -w -X main.Version=1.16.26+local.tmux-health2' \
   -o "$build_dir/agent-deck" ./cmd/agent-deck
 "$build_dir/agent-deck" version
 
