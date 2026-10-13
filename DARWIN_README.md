@@ -141,9 +141,11 @@ The wrapper passes the current working directory explicitly because remote
 connections otherwise inherit the server's directory. An explicit `-C` or `--cd`
 takes precedence; other arguments are forwarded to Codex.
 
-The `auto` profile is initialized as a writable `~/.codex/auto.config.toml`.
+The `auto` profile is initialized as a writable `~/.codex/auto.config.toml`,
+with `gpt-6.1-sol` and `model_reasoning_effort = "high"` as its defaults.
 Home Manager does not overwrite it on later rebuilds, so model changes made in
-the Codex TUI persist.
+the Codex TUI persist. To update an existing profile, change `model` and
+`model_reasoning_effort` in that file.
 
 In principle, the built-in `--approve-for-me` flag can replace the profile's
 permission settings: `approval_policy = "on-request"`,

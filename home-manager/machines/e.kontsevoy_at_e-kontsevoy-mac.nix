@@ -59,6 +59,9 @@ let
     exec codex --remote unix:// --profile auto "''${cwd_args[@]}" "''${notify_args[@]}" "$@"
   '';
   codexAutoConfig = pkgs.writeText "codex-auto.config.toml" ''
+    model = "gpt-6.1-sol"
+    model_reasoning_effort = "high"
+
     # Let Codex review eligible approval requests while keeping commands sandboxed.
     approval_policy = "on-request"
     approvals_reviewer = "auto_review"
