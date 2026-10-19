@@ -242,8 +242,12 @@ offers the `agents` command. No model task or subagent was started for this chec
 
 ## Agent Deck integration
 
-Agent Deck is installed independently at `~/go/bin/agent-deck` (audited version
-1.16.22). Home Manager provides `agent-deck-configure` and runs it at activation.
+Agent Deck is installed independently at `~/go/bin/agent-deck` and updated with
+`agent-deck update` (installed version checked on 2026-10-19: 1.16.30). The former
+local tmux health patch and its build script have been removed; Nix does not
+build or replace the Agent Deck binary.
+
+Home Manager provides `agent-deck-configure` and runs it at activation.
 It updates only these settings in the mutable `~/.config/agent-deck/config.toml`:
 
 ```toml

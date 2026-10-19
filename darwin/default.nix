@@ -104,12 +104,7 @@ in
     enable = true;
     onActivation.cleanup = "zap";
     global.brewfile = true;
-    # taps = [ "asheshgoplani/tap" ];
     brews = [
-      # {
-      #   name = "asheshgoplani/tap/agent-deck";
-      #   trusted = true;
-      # }
       "mas"
       "yubico-piv-tool"
     ];
