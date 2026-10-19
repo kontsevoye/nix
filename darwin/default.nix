@@ -15,7 +15,26 @@ let
   };
 in
 {
-  imports = [ ../shared/nix-settings.nix ];
+  imports = [
+    ../shared/nix-settings.nix
+    # The image builder's QEMU supports kvm:tcg fallback. Allow this one image
+    # to build through TCG on Macs without nested KVM (including M1/M2).
+    (import "${inputs.nix-rosetta-builder}/module.nix" {
+      linuxSystem = "aarch64-linux";
+      image = inputs.nix-rosetta-builder.packages.aarch64-linux.image.overrideDerivation (old: {
+        requiredSystemFeatures = lib.remove "kvm" (old.requiredSystemFeatures or [ ]);
+      });
+    })
+  ];
+
+  nix-rosetta-builder = {
+    enable = true;
+    onDemand = true;
+    onDemandLingerMinutes = 5;
+    cores = 4;
+    memory = "4GiB";
+    diskSize = "64GiB";
+  };
 
   nix.enable = true;
   # Use the open-source engine; nix-darwin still manages the daemon and GC.

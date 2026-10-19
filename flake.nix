@@ -22,6 +22,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     determinate-nix.url = "github:DeterminateSystems/nix-src/v3.22.3";
+    nix-rosetta-builder = {
+      url = "github:cpick/nix-rosetta-builder";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -70,6 +74,24 @@
         );
     in
     {
+      # Temporary, cached ARM Linux builder used only by scripts/darwin-switch.
+      # Keep guest settings unchanged so it can bootstrap without a Linux builder.
+      packages.aarch64-darwin.linux-builder-bootstrap =
+        (nixpkgs.legacyPackages.aarch64-darwin.darwin.linux-builder.override {
+          modules = [
+            ({ lib, ... }: {
+              virtualisation.forwardPorts = lib.mkForce [
+                {
+                  from = "host";
+                  host.address = "127.0.0.1";
+                  host.port = 31022;
+                  guest.port = 22;
+                }
+              ];
+            })
+          ];
+        }).run-builder;
+
       formatter = forEachSystem ({ pkgs, ... }: pkgs.nixfmt);
       devShells = forEachSystem (
         { pkgs, ... }:

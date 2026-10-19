@@ -1,8 +1,8 @@
 ## Install
 
 ```bash
-# run inside current directory or change "." to the actual location
-nix --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake .
+# From this checkout, after installing Nix:
+sudo -H ./scripts/darwin-switch
 ```
 
 ## Update
@@ -17,9 +17,87 @@ nix flake update .
 ### Rebuild configuration after changes
 
 ```bash
-# run inside current directory or change "." to the actual location
-sudo darwin-rebuild switch --flake .
+sudo -H ./scripts/darwin-switch
 ```
+
+The same command handles both a fresh Mac and subsequent rebuilds. It builds
+the final system before switching, using this checkout's locked inputs. Nix
+must already be installed with a working daemon. The command targets the
+`e-kontsevoy-mac` configuration, even if the fresh Mac has another hostname.
+
+## Linux builds on macOS
+
+The Mac imports [nix-rosetta-builder](https://github.com/cpick/nix-rosetta-builder)
+through nix-darwin. The guest builds `aarch64-linux` natively and `x86_64-linux`
+through Rosetta. It has 4 CPU cores, 4 GiB RAM, and a 64 GiB virtual disk.
+The sparse disk grows as data is written; this is not a 64 GiB space reservation
+or a limit on all host-side Nix store/cache usage.
+
+Measured on 2026-10-19 after the smoke builds: the complete VM directory used
+4.9 GiB. Its `diffdisk` had a logical size of 64 GiB but only 2.49 GiB allocated
+on the host (5,217,888 blocks of 512 bytes).
+
+`onDemand = true` keeps the VM stopped until Nix connects to it. After 5 minutes
+of inactivity the guest powers off; its disk remains. Changing the upstream
+module's generated VM configuration may recreate that disposable builder disk.
+
+`scripts/darwin-switch` automates initial setup:
+
+1. Install Rosetta if an x86_64 executable cannot run (accepting Apple's license).
+2. Skip VM startup entirely if the final system is already in the local store.
+   Otherwise check whether the permanent builder is registered with Nix and
+   launchd, without connecting to SSH or waking its VM. Nix starts it if needed.
+3. If a build is needed and the permanent builder is not registered, fetch the
+   stock Linux builder guest from the Nix cache and start a temporary QEMU VM,
+   accessible only on loopback.
+   This does not activate an intermediate nix-darwin system.
+4. Build the final system using that VM and activate the exact built output.
+5. Shut down the temporary VM and remove its disk and temporary credentials,
+   including on build/activation failure or interruption.
+
+The temporary VM uses its own client key, pins the stock guest's host key,
+and leaves `/etc/nix/builder_ed25519` and existing SSH configuration untouched.
+Only its public client key is copied into the guest's Nix store. Port 31022
+must be available if bootstrap is necessary; the permanent builder uses 31122.
+The stock guest settings are unchanged to retain binary-cache availability;
+if its cached Linux outputs are unavailable, another Linux builder is required.
+
+For image generation, the module removes the `kvm` scheduling requirement from
+the Rosetta disk-image derivation only. The pinned nixpkgs QEMU command supports
+`kvm:tcg` fallback, allowing this image to build through software emulation in
+the temporary guest on M1/M2 Macs without nested KVM. This can make initial image
+generation slower; the temporary builder does not advertise KVM support.
+
+The regular configuration registers the permanent VM with Nix automatically,
+so subsequent Linux builds need no manual start/stop commands. Privileged SSH
+diagnostics use `sudo ssh rosetta-builder`; ordinary Nix builds do not need sudo
+for a user trusted by the Nix daemon.
+
+To test bootstrap and build without installing Rosetta or activating the system:
+
+```bash
+./scripts/darwin-switch --build-only
+```
+
+This still temporarily starts a Linux VM when necessary. For system activation,
+use the full command above. Direct
+`darwin-rebuild switch --flake .` continues to work once a Linux builder is
+available, but does not perform automatic bootstrap or install Rosetta.
+
+Verified on the Mac on 2026-10-19: initial bootstrap and full system build,
+cleanup after a build failure, a cached repeat without VM startup, and two
+successful user-run activations. The permanent builder then started on its
+first build request and built both `aarch64-linux` and `x86_64-linux` smoke
+derivations. An active build lasting 330 seconds completed without being
+interrupted by the 5 minute idle timeout. The VM subsequently powered off
+without manual intervention; its Lima and Virtualization.framework processes
+exited. A new uncached x86_64 Linux build then started it again and succeeded.
+
+The pinned Lima foreground runner treats the guest's shutdown event as an
+exit error, so launchd can report `last exit code = 1` after a normal idle
+shutdown. This was observed together with successful builds and a successful
+subsequent restart; that code alone does not establish a VM crash. See Lima's
+[foreground event handling](https://github.com/cpick/lima/blob/afbfdfb8dd5fa370547b7fc64a16ce2a354b1ff0/pkg/instance/start.go#L295).
 
 ## Nix engine
 
@@ -39,7 +117,7 @@ To upgrade the engine, change its release tag in `flake.nix`, then run:
 ```bash
 nix flake update determinate-nix
 nix build .#darwinConfigurations.e-kontsevoy-mac.system --no-link
-sudo darwin-rebuild switch --flake .
+sudo -H ./scripts/darwin-switch
 ```
 
 Keep the engine's own nixpkgs input: making it follow the system's nixpkgs can

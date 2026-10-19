@@ -1,0 +1,150 @@
+#!/bin/bash
+# Run with sudo -H. Uses a temporary Linux VM only for uncached builds without
+# a registered Rosetta builder; no intermediate system is activated.
+set -euo pipefail
+
+if [[ ${1:-} == --help ]]; then
+  printf 'Usage: sudo -H %s [--build-only]\n' "$0"
+  exit 0
+fi
+build_only=false
+if [[ ${1:-} == --build-only ]]; then
+  build_only=true
+  shift
+fi
+if [[ $# -ne 0 ]]; then
+  printf 'Unknown argument: %s\n' "$1" >&2
+  exit 2
+fi
+if [[ $(uname -s) != Darwin || $(uname -m) != arm64 ]]; then
+  printf 'This command requires an Apple Silicon Mac.\n' >&2
+  exit 1
+fi
+if [[ $EUID -ne 0 && $build_only == false ]]; then
+  printf 'Run this command with sudo -H (VM setup and system activation require root).\n' >&2
+  exit 1
+fi
+
+repo=$(cd "$(dirname "$0")/.." && pwd -P)
+nix_bin=$(command -v nix || true)
+if [[ -z $nix_bin ]]; then
+  nix_bin=/nix/var/nix/profiles/default/bin/nix
+fi
+if [[ ! -x $nix_bin ]]; then
+  printf 'Install the Nix package manager first.\n' >&2
+  exit 1
+fi
+export NIX_REMOTE=daemon
+nix_flags=(--extra-experimental-features 'nix-command flakes')
+build_flags=(--no-write-lock-file --print-build-logs)
+temp_dir=$(mktemp -d /private/tmp/my-nix-builder.XXXXXX)
+bootstrap_pid=
+bootstrap_ssh=()
+
+cleanup() {
+  result=$?
+  trap - EXIT INT TERM
+  if [[ -n $bootstrap_pid ]]; then
+    printf 'Stopping temporary Linux builder...\n' >&2
+    "${bootstrap_ssh[@]}" shutdown now >/dev/null 2>&1 || true
+    for ((i = 0; i < 20; i++)); do
+      kill -0 "$bootstrap_pid" 2>/dev/null || break
+      sleep 1
+    done
+    # The runner and QEMU have their own process group (set -m below).
+    kill -TERM -- "-$bootstrap_pid" 2>/dev/null || true
+    wait "$bootstrap_pid" 2>/dev/null || true
+    if [[ $result -ne 0 ]]; then
+      tail -n 40 "$temp_dir/bootstrap.log" >&2 || true
+    fi
+  fi
+  rm -rf -- "$temp_dir"
+  exit "$result"
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+# Check execution rather than package receipts, which differ across macOS versions.
+if [[ $build_only == false ]] && ! /usr/bin/arch -x86_64 /usr/bin/true >/dev/null 2>&1; then
+  /usr/sbin/softwareupdate --install-rosetta --agree-to-license
+fi
+
+target="$repo#darwinConfigurations.e-kontsevoy-mac.system"
+desired_system=$("$nix_bin" "${nix_flags[@]}" eval --no-write-lock-file --raw "$target.outPath")
+bootstrap_needed=true
+if "$nix_bin" "${nix_flags[@]}" path-info --offline "$desired_system" >/dev/null 2>&1; then
+  printf 'Final system is already built; no Linux VM needed.\n' >&2
+  bootstrap_needed=false
+elif [[ -f /etc/ssh/ssh_config.d/100-rosetta-builder.conf && -f /etc/nix/machines ]] &&
+  /usr/bin/grep -q rosetta-builder /etc/nix/machines &&
+  /bin/launchctl print system/org.nixos.rosetta-builderd >/dev/null 2>&1; then
+  # Do not probe SSH: that would wake the VM even for a fully cached Darwin build.
+  printf 'Using registered Rosetta builder; Nix will start it only if needed.\n' >&2
+  bootstrap_needed=false
+fi
+
+if [[ $bootstrap_needed == true ]]; then
+  printf 'Preparing temporary Linux builder...\n' >&2
+  "$nix_bin" "${nix_flags[@]}" build "${build_flags[@]}" \
+    "$repo#linux-builder-bootstrap" --out-link "$temp_dir/bootstrap"
+
+  # Only the public key enters the guest's store. Leave /etc/nix/builder_* intact.
+  mkdir "$temp_dir/keys"
+  /usr/bin/ssh-keygen -q -t ed25519 -N '' -f "$temp_dir/client-key"
+  cp "$temp_dir/client-key.pub" "$temp_dir/keys/builder_ed25519.pub"
+  host_key='ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJBWcxb/Blaqt1auOtE+F8QUWrUotiC5qBJ+UuEWdVCb'
+  printf '[127.0.0.1]:31022 %s\n' "$host_key" > "$temp_dir/known_hosts"
+  bootstrap_ssh=(/usr/bin/ssh -F /dev/null -p 31022 -i "$temp_dir/client-key"
+    -o BatchMode=yes -o IdentitiesOnly=yes -o ConnectTimeout=3
+    -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$temp_dir/known_hosts"
+    builder@127.0.0.1)
+
+  # Avoid accidentally using or stopping another builder already on this port.
+  if /usr/bin/nc -z 127.0.0.1 31022; then
+    printf 'Port 31022 is already in use; stop that builder before retrying.\n' >&2
+    exit 1
+  fi
+  set -m
+  (
+    cd "$temp_dir"
+    export KEYS="$temp_dir/keys"
+    exec "$temp_dir/bootstrap/bin/run-builder"
+  ) </dev/null > "$temp_dir/bootstrap.log" 2>&1 &
+  bootstrap_pid=$!
+
+  ready=false
+  for ((i = 0; i < 90; i++)); do
+    if "${bootstrap_ssh[@]}" true 2>/dev/null; then
+      ready=true
+      break
+    fi
+    if ! kill -0 "$bootstrap_pid" 2>/dev/null; then
+      break
+    fi
+    sleep 2
+  done
+  if [[ $ready == false ]]; then
+    printf 'Temporary builder did not become ready.\n' >&2
+    exit 1
+  fi
+  # Nix pins the known guest host key independently of SSH user configuration.
+  encoded_host_key=$(printf '%s\n' "$host_key" | /usr/bin/base64 | tr -d '\n')
+  build_flags+=(--option builders
+    "ssh-ng://builder@127.0.0.1:31022 aarch64-linux $temp_dir/client-key 1 1 - - $encoded_host_key"
+    --option builders-use-substitutes true)
+fi
+
+printf 'Building the final nix-darwin system...\n' >&2
+"$nix_bin" "${nix_flags[@]}" build "${build_flags[@]}" \
+  "$target" --out-link "$temp_dir/system"
+system_path=$(readlink "$temp_dir/system")
+if [[ $build_only == true ]]; then
+  printf 'Built successfully: %s\n' "$system_path"
+  exit 0
+fi
+
+# Activate the exact reviewed/built output, without a second evaluation or build.
+"${nix_bin%/nix}/nix-env" -p /nix/var/nix/profiles/system --set "$system_path"
+"$system_path/sw/bin/darwin-rebuild" activate
+printf 'Rosetta builder configured: 4 cores, 4 GiB RAM, 5 minute idle shutdown.\n'
