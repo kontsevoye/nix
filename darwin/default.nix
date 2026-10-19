@@ -142,7 +142,6 @@ in
       "codex"
       "copilot-cli"
       "rustdesk"
-      "wallspace"
     ];
   };
 
