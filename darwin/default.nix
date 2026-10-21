@@ -86,6 +86,31 @@ in
   };
 
   system.activationScripts.postActivation.text = lib.mkAfter ''
+    echo >&2 "removing compromised eMudhra trust paths from Apple's PEM bundle..."
+    # /usr/bin/curl -q uses this file rather than nix-darwin's CA bundle.
+    # Reapply after macOS updates, preserving the original once for rollback.
+    apple_ca_bundle=/etc/ssl/cert.pem
+    if [ -f "$apple_ca_bundle" ]; then
+      filtered_ca_bundle=$(/usr/bin/mktemp /etc/ssl/.cert-emudhra.XXXXXX)
+      if /usr/bin/awk -f ${../shared/certificates/filter-emudhra-macos.awk} \
+        "$apple_ca_bundle" > "$filtered_ca_bundle" &&
+        /usr/bin/grep -q '^-----BEGIN CERTIFICATE-----$' "$filtered_ca_bundle"; then
+        if ! /usr/bin/cmp -s "$apple_ca_bundle" "$filtered_ca_bundle"; then
+          if [ ! -e "$apple_ca_bundle.before-emudhra" ]; then
+            /bin/cp -p "$apple_ca_bundle" "$apple_ca_bundle.before-emudhra"
+          fi
+          /usr/sbin/chown root:wheel "$filtered_ca_bundle"
+          /bin/chmod 644 "$filtered_ca_bundle"
+          /bin/mv -f "$filtered_ca_bundle" "$apple_ca_bundle"
+        fi
+      else
+        /bin/rm -f "$filtered_ca_bundle"
+        echo >&2 "Failed to filter Apple's CA bundle; original preserved."
+        exit 1
+      fi
+      /bin/rm -f "$filtered_ca_bundle"
+    fi
+
     echo >&2 "setting up Amphetamine Power Protect..."
     power_protect_dir=${lib.escapeShellArg "/Users/${username}/Library/Application Scripts/com.if.Amphetamine"}
     power_protect_file="$power_protect_dir/powerProtect.scpt"

@@ -16,9 +16,13 @@ let
     exec ${agentDeckPython}/bin/python3 ${agentDeckConfigureScript} \
       ${lib.escapeShellArg "${homeDirectory}/.config/agent-deck/config.toml"}
   '';
-  # Keep Mozilla roots and the existing homelab CA available to Nix curl.
+  # curl's explicit bundle must apply the same exclusions as the system bundle.
+  curlCacert = pkgs.cacert.override {
+    blacklist = import ../../shared/certificates/emudhra-blacklist.nix;
+  };
+  # Keep the remaining Mozilla roots and the existing homelab CA available.
   curlCaBundle = pkgs.runCommand "curl-homelab-ca-bundle.pem" { } ''
-    cat ${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt \
+    cat ${curlCacert}/etc/ssl/certs/ca-bundle.crt \
       ${../../shared/certificates/homelab-root-ca.crt} > "$out"
   '';
   claudeCodeRouterUpdate = pkgs.writeShellScriptBin "claude-code-router-update" ''

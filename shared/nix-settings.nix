@@ -1,6 +1,9 @@
 { ... }:
 
 {
+  # Also protects Nix's system CA bundle on Darwin and both NixOS hosts.
+  security.pki.caCertificateBlacklist = import ./certificates/emudhra-blacklist.nix;
+
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"
