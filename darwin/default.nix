@@ -147,7 +147,7 @@ in
       "iterm2"
       "lunar"
       "microsoft-edge"
-      "qbittorrent"
+      "transmission"
       "unnaturalscrollwheels"
       "steam"
       "sublime-text"

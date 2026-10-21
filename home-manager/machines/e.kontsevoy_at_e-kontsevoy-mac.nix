@@ -105,6 +105,15 @@ in
     cacert = "${curlCaBundle}"
   '';
 
+  # Keep the familiar application path while Homebrew manages Transmission.
+  home.activation.linkTransmissionAsQBittorrent = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    transmission_alias=${lib.escapeShellArg "${homeDirectory}/Applications/qBittorrent.app"}
+    if [ ! -e "$transmission_alias" ] && [ ! -L "$transmission_alias" ]; then
+      run mkdir -p ${lib.escapeShellArg "${homeDirectory}/Applications"}
+      run ln -s Transmission.app "$transmission_alias"
+    fi
+  '';
+
   # Keep the file mutable for Agent Deck's Settings UI. Manage only these
   # integration settings, preserving unrelated keys and backing up changes.
   home.activation.configureAgentDeck = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
