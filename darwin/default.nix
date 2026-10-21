@@ -138,7 +138,6 @@ in
       require_sha = true;
     };
     casks = [
-      "hiddenbar"
       "raycast"
       "jetbrains-toolbox"
       "orbstack"
