@@ -25,6 +25,21 @@ the final system before switching, using this checkout's locked inputs. Nix
 must already be installed with a working daemon. The command targets the
 `e-kontsevoy-mac` configuration, even if the fresh Mac has another hostname.
 
+## Ghostty build prerequisites
+
+The Ghostty PR #9857 package (Quick Terminal tabs) requires Xcode 27.1 in
+`/Applications/Xcode.app` and its Metal component. After installing or updating
+Xcode, install the component before rebuilding:
+
+```bash
+xcodebuild -downloadComponent MetalToolchain
+```
+
+The recipe checks the Xcode version and Metal toolchain identifier. It locates
+the mounted compiler directly because `xcrun` component discovery does not
+work for Nix build users with this Xcode release. The Swift compiler also gets
+`-disable-sandbox` so its macro plugins can run inside Nix's build sandbox.
+
 ## Linux builds on macOS
 
 The Mac imports [nix-rosetta-builder](https://github.com/cpick/nix-rosetta-builder)

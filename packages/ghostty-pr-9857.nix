@@ -17,7 +17,7 @@ let
   # Head of adrum/ghostty's feat/quickterm-with-tab branch (PR #9857).
   rev = "0dc5d8bd07ba839e371309e41b4a4cb11785c69c";
   version = "1.3.2-dev+pr9857.${builtins.substring 0 8 rev}";
-  metalToolchain = "com.apple.dt.toolchain.Metal.32023.883";
+  metalToolchain = "com.apple.dt.toolchain.Metal.32023.921.5";
 
   src = fetchFromGitHub {
     owner = "ghostty-org";
@@ -98,6 +98,34 @@ let
     exec /usr/bin/xcrun --sdk macosx libtool "$@"
   '';
 
+  # xcrun's component discovery fails for _nixbld users even with --no-cache.
+  # Locate the mounted, versioned toolchain and run its compiler directly.
+  metalRunner = writeShellScriptBin "ghostty-metal" ''
+    set -euo pipefail
+    if [[ $# -lt 3 || "$1" != -sdk ]]; then
+      echo "Usage: ghostty-metal -sdk SDK metal|metallib [args...]" >&2
+      exit 1
+    fi
+    sdk="$2"
+    tool="$3"
+    shift 3
+    case "$tool" in
+      metal|metallib) ;;
+      *) echo "Unsupported Metal tool: $tool" >&2; exit 1 ;;
+    esac
+    SDKROOT="$(/usr/bin/xcrun --no-cache --sdk "$sdk" --show-sdk-path)"
+    export SDKROOT
+    for toolchain in /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-*/Metal.xctoolchain; do
+      [[ -d "$toolchain" ]] || continue
+      identifier=$(/usr/bin/plutil -extract Identifier raw -o - "$toolchain/ToolchainInfo.plist") || continue
+      if [[ "$identifier" == ${lib.escapeShellArg metalToolchain} ]]; then
+        exec "$toolchain/usr/bin/$tool" "$@"
+      fi
+    done
+    echo "Expected installed Metal toolchain ${metalToolchain}" >&2
+    exit 1
+  '';
+
   # Ghostty's macOS frontend is an Xcode project. Keep that impure dependency
   # narrow; preBuild below fails if the host moves to an untested release.
   xcodeWrapper = xcodeenv.composeXcodeWrapper { };
@@ -163,8 +191,8 @@ stdenv.mkDerivation (finalAttrs: {
         rm -f macos/Ghostty.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
         substituteInPlace src/build/MetallibStep.zig \
-          --replace-fail '"/usr/bin/xcrun", "-sdk", sdk, "metal"' '"/usr/bin/xcrun", "--no-cache", "--toolchain", "${metalToolchain}", "-sdk", sdk, "metal"' \
-          --replace-fail '"/usr/bin/xcrun", "-sdk", sdk, "metallib"' '"/usr/bin/xcrun", "--no-cache", "--toolchain", "${metalToolchain}", "-sdk", sdk, "metallib"'
+          --replace-fail '"/usr/bin/xcrun", "-sdk", sdk, "metal"' '"${metalRunner}/bin/ghostty-metal", "-sdk", sdk, "metal"' \
+          --replace-fail '"/usr/bin/xcrun", "-sdk", sdk, "metallib"' '"${metalRunner}/bin/ghostty-metal", "-sdk", sdk, "metallib"'
 
         substituteInPlace src/build/GhosttyXcodebuild.zig \
           --replace-fail \
@@ -174,7 +202,8 @@ stdenv.mkDerivation (finalAttrs: {
                 try env_map.put("HOME", v);
                 try env_map.put("CFFIXED_USER_HOME", v);
             }
-            if (env.get("DEVELOPER_DIR")) |v| try env_map.put("DEVELOPER_DIR", v);'
+            if (env.get("DEVELOPER_DIR")) |v| try env_map.put("DEVELOPER_DIR", v);' \
+          --replace-fail '"-configuration",' '"OTHER_SWIFT_FLAGS=$(inherited) -disable-sandbox", "-configuration",'
   '';
 
   preBuild = ''
@@ -183,13 +212,12 @@ stdenv.mkDerivation (finalAttrs: {
     mkdir -p "$HOME"
 
     xcode_version="$(xcodebuild -version | sed -n '1p')"
-    if [[ "$xcode_version" != "Xcode 26.6" ]]; then
-      echo "Expected Xcode 26.6, got: $xcode_version" >&2
+    if [[ "$xcode_version" != "Xcode 27.1" ]]; then
+      echo "Expected Xcode 27.1, got: $xcode_version" >&2
       exit 1
     fi
 
-    # OS updates can leave xcrun's cache pointing at Xcode's Metal stub.
-    if ! /usr/bin/xcrun --no-cache --toolchain ${metalToolchain} metal -v >/dev/null; then
+    if ! ${metalRunner}/bin/ghostty-metal -sdk macosx metal -v >/dev/null; then
       echo "Expected installed Metal toolchain ${metalToolchain}" >&2
       exit 1
     fi
