@@ -5,6 +5,5 @@
     chromium
     keepassxc
     vlc
-    streamlink-twitch-gui-bin
   ];
 }
