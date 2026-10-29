@@ -93,6 +93,7 @@ in
       NPM_CONFIG_PREFIX = npmGlobalPrefix;
     };
     packages = [
+      pkgs.mosh
       agentDeckConfigure
       claudeCodeRouterUpdate
       codexAuto
